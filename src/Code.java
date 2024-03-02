@@ -1,6 +1,6 @@
 import java.sql.*;
 
-public class Main {
+public class Code {
         public static void main(String[] args) throws SQLException, ClassNotFoundException {
         System.out.println("Trying to connect....");
         String url = "jdbc:mysql://localhost:3306/";
