@@ -5,7 +5,7 @@ import java.io.BufferedReader;
 
 public class Code {
 
-    String[] joesSQLStatments = {};
+    String[] joesSQLStatments = {"CREATE DATABASE SCC210;", "USE SCC201;", "SHOW TABLES;"};
 
     String[] dannysSqlStatments = {};
 
@@ -25,14 +25,24 @@ public class Code {
             String[][] statments = code.getSQLStatments();
 
             for (String[] statmentsSQL : statments) { //starting on each set of querys for each person
+                try {
+                    Statement statment = con.createStatement();
+
+                    for (String query: statmentsSQL) {
+
+                        String SQLQuery = query;
+                        statment.executeUpdate(SQLQuery);
+
+                        System.out.println(SQLQuery + "this statement has been executed");
+
+                    }
 
 
-
-
-
-
-
-
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    System.out.println("finished");
+                }
             }
 
         }
@@ -40,13 +50,12 @@ public class Code {
     }
 
     public String[][] getSQLStatments() {
-        String[][] sqlStatements = {
+
+        return new String[][]{
                 this.joesSQLStatments,
                 this.dannysSqlStatments,
                 this.scottsSQLStatments
         };
-
-        return sqlStatements;
     }
 
 
