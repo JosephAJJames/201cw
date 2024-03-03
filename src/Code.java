@@ -17,6 +17,10 @@ public class Code {
         System.out.println("Trying to connect....");
         Connection con = connect(url);
 
+        if (con == null) {
+            System.exit(0);
+        }
+
         String[] csvArray = {"38639416.csv", "38790475.csv", "1234567.csv"};
         for (String filenumber: csvArray) {
 
