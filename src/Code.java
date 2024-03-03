@@ -5,7 +5,7 @@ import java.io.BufferedReader;
 
 public class Code {
 
-    String[] joesSQLStatments = {"CREATE DATABASE SCC210;", "USE SCC201;", "SHOW TABLES;"};
+    String[] joesSQLStatments = {"CREATE DATABASE LOTSOFTABLESS;", "USE LOTSOFTABLESS;"};
 
     String[] dannysSqlStatments = {};
 
@@ -21,20 +21,26 @@ public class Code {
             System.exit(0);
         }
 
-        String[] csvArray = {"38639416.csv", "38790475.csv", "1234567.csv"};
+        System.out.println("Connected Succesfully");
+
+        String[] csvArray = {"38639416.csv"};
         for (String filenumber: csvArray) {
 
-            csvReader reader = new csvReader("/home/jamesj9/IdeaProjects/201cw/src/38639416.csv");
+
+            csvReader reader = new csvReader("src/38639416.csv");
 
             String[][] statments = code.getSQLStatments();
 
             for (String[] statmentsSQL : statments) { //starting on each set of querys for each person
+                
                 try {
                     Statement statment = con.createStatement();
 
                     for (String query: statmentsSQL) {
 
+
                         String SQLQuery = query;
+
                         statment.executeUpdate(SQLQuery);
 
                         System.out.println(SQLQuery + "this statement has been executed");
@@ -45,7 +51,7 @@ public class Code {
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    System.out.println("finished");
+                    //System.out.println("finished");
                 }
             }
 
