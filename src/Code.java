@@ -2,6 +2,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.sql.*;
 import java.io.BufferedReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Code {
 
@@ -27,7 +29,7 @@ public class Code {
         for (String filenumber: csvArray) {
 
 
-            csvReader reader = new csvReader("src/38639416.csv");
+            CsvReader reader = new CsvReader("src/38639416.csv");
 
             String[][] statments = code.getSQLStatments();
 
@@ -37,7 +39,6 @@ public class Code {
                     Statement statment = con.createStatement();
 
                     for (String query: statmentsSQL) {
-
 
                         String SQLQuery = query;
 
@@ -59,7 +60,8 @@ public class Code {
 
     }
 
-    public String[][] getSQLStatments() {
+    public String[][] getSQLStatments()
+    {
 
         return new String[][]{
                 this.joesSQLStatments,
@@ -69,7 +71,8 @@ public class Code {
     }
 
 
-    public static Connection connect(String url) throws SQLException {
+    public static Connection connect(String url) throws SQLException
+    {
             try {
                 Connection con = DriverManager.getConnection(url);
                 return con;
@@ -81,16 +84,36 @@ public class Code {
 
 }
 
-class csvReader {
+class CsvReader {
     BufferedReader bufferedReader;
 
-    public csvReader(String fileName)
+    List<String[]> allRows = new ArrayList<>();
+
+    public CsvReader(String fileName)
     {
         try {
             bufferedReader = new BufferedReader(new FileReader(fileName));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
 
+    public static void main(String[] args) {
+        CsvReader reader = new CsvReader("src/38639416.csv");
+    }
+
+
+    public void readInFile()
+    {
+        String line;
+        try {
+            while ((line = bufferedReader.readLine()) != null) {
+                
+                String[] row = line.split(",");
+                allRows.add(row);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
