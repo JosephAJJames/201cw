@@ -9,9 +9,9 @@ public class Code {
 
     String[] joesSQLStatments = {"DROP DATABASE PremGames;" , "CREATE DATABASE PremGames;", "USE PremGames;",
 
-            "CREATE TABLE Tactics(tID INT PRIMARY KEY NOT NULL,cID INT , PosStyle VARCHAR(10), Formation VARCHAR(10), TacticName VARCHAR(25), FOREIGN KEY cID REFERENCES Coaches(cID));",
-
             "CREATE TABLE Coaches(cID INT PRIMARY KEY NOT NULL, FirstName VARCHAR(25), LastName VARCHAR(25), NumberOfTrophies INT, HasTeam BOOLEAN)",
+
+            "CREATE TABLE Tactics(tID INT PRIMARY KEY NOT NULL,cID INT , PosStyle VARCHAR(10), Formation VARCHAR(10), TacticName VARCHAR(25), FOREIGN KEY (cID) REFERENCES Coaches(cID));",
 
             "CREATE TABLE Referees(rID INT PRIMARY KEY NOT NULL, FirstName VARCHAR(25), LastName VARCHAR(25), yCardsThisYear INT, rCardsThisYear INT)",
 
