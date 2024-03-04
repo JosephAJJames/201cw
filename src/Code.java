@@ -7,9 +7,9 @@ import java.util.List;
 
 public class Code {
 
-    String[] joesSQLStatments = {"CREATE DATABASE PremGames;", "USE PremGames;",
+    String[] joesSQLStatments = {"DROP DATABASE PremGames;" , "CREATE DATABASE PremGames;", "USE PremGames;",
 
-            "CREATE TABLE Tactics(tID INT PRIMARY KEY NOT NULL,cID INT , PosStyle VARCHAR(10), Formation VARCHAR(10), FOREIGN KEY cID REFERENCES Coaches(cID), TacticName VARCHAR(25) );",
+            "CREATE TABLE Tactics(tID INT PRIMARY KEY NOT NULL,cID INT , PosStyle VARCHAR(10), Formation VARCHAR(10), TacticName VARCHAR(25), FOREIGN KEY cID REFERENCES Coaches(cID));",
 
             "CREATE TABLE Coaches(cID INT PRIMARY KEY NOT NULL, FirstName VARCHAR(25), LastName VARCHAR(25), NumberOfTrophies INT, HasTeam BOOLEAN)",
 
@@ -23,9 +23,9 @@ public class Code {
 
             "CREATE TABLE Players(pID INT PRIMARY KEY NOT NULL, tID INT, Position VARCHAR(5),DOB (DATE) , HeightCM INT), ShirtNum INT, FOREIGN KEY tID REFERENCES Teams(tID);",
 
-            "DROP PremGames"};
+            "DROP DATABSE PremGames"};
 
-    String[] dannysSqlStatments = {"CREATE DATABASE PremBusiness;", "USE PremBusiness;", "DROP PremBusiness"};
+    String[] dannysSqlStatments = {"DROP DATABASE PremBusiness" ,"CREATE DATABASE PremBusiness;", "USE PremBusiness;", "DROP DATABASE PremBusiness"};
 
 
     String[] scottsSQLStatments = {};
