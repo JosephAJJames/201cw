@@ -17,7 +17,7 @@ public class Code {
 
             "CREATE TABLE Referees(rID INT PRIMARY KEY NOT NULL, FirstName VARCHAR(25), LastName VARCHAR(25), yCardsThisYear INT, rCardsThisYear INT)",
 
-            "CREATE TABLE TeamMatchups(tmID INT PRIMARY KEY NOT NULL, HomeTeam INT NOT NULL, AwayTeam INT NOT NULL, FOREIGN KEY HomeTeam REFERENCES Teams(tID), FOREIGN KEY AwayTeam REFERENCES Teams(tID));",
+            "CREATE TABLE TeamMatchups(tmID INT PRIMARY KEY NOT NULL, HomeTeam INT NOT NULL, AwayTeam INT NOT NULL, FOREIGN KEY (HomeTeam) REFERENCES Teams(tID), FOREIGN KEY (AwayTeam) REFERENCES Teams(tID));",
 
             "CREATE TABLE Fixtures(fID INT PRIMARY KEY NOT NULL, KickOff DATETIME, WeatherConditions VARCHAR (25), HomeScore INT, AwayScore INT, rID INT, FOREIGN KEY rID REFERENCES Referees(rID), tmID Integer NOT NULL UNIQUE, FOREIGN KEY tmID REFERENCES TeamMatchups(tmID))",   //referee would be NOT NULL however, referees for future games have not yet been decided
 
