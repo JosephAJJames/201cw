@@ -25,8 +25,23 @@ public class Code {
 
             };
 
-    String[] dannysSqlStatments = {};
-    //"DROP DATABASE PremBusiness" ,"CREATE DATABASE PremBusiness;", "USE PremBusiness;", "DROP DATABASE PremBusiness"
+    String[] dannysSqlStatments = {
+
+        "DROP DATABASE IF EXISTS PremBusiness", "CREATE DATABASE PremBusiness;", "USE PremBusiness;",
+
+        
+        "CREATE TABLE Stadiums (sID INTEGER PRIMARY KEY NOT NULL, Capacity INTEGER NOT NULL, StadiumName VARCHAR(50) NOT NULL, YearBuilt INTEGER NOT NULL, PostCode VARCHAR(10) NOT NULL, IsActive BOOLEAN NOT NULL, AverageTicketSales INTEGER);",
+        "CREATE TABLE ShirtSponsors (ssID INTEGER PRIMARY KEY NOT NULL, ShirtSponsorName VARCHAR(50), CountryFounded VARCHAR(50), Owner VARCHAR(50), Website VARCHAR(50));",
+        "CREATE TABLE Teams (tID INTEGER PRIMARY KEY NOT NULL, TeamName VARCHAR(30), sID INTEGER, ssID INTEGER, YearFounded INTEGER, Website VARCHAR(60), FOREIGN KEY (sID) REFERENCES Stadiums(sID), FOREIGN KEY (ssID) REFERENCES ShirtSponsors(ssID));",
+        "CREATE TABLE Players(pID INT PRIMARY KEY NOT NULL, tID INT, StrongFoot VARCHAR(1), DOB DATE, WeightKG INT, ShirtNum INT, FOREIGN KEY (tID) REFERENCES Teams(tID));",
+        "CREATE TABLE Contracts (cID INTEGER PRIMARY KEY, pID INTEGER UNIQUE, ContractType VARCHAR(20), WeeklySalaryUSD DECIMAL, DateSigned DATE, ExpiryDate DATE, Active BOOLEAN, FOREIGN KEY (pID) REFERENCES Players(pID));",
+        "CREATE TABLE Injuries (iID INTEGER PRIMARY KEY, pID INTEGER NOT NULL, DateOfInjury DATE NOT NULL, DateOfRecovery DATE, TypeOfInjury VARCHAR(50), FOREIGN KEY (pID) REFERENCES Players(pID));",
+        "CREATE TABLE TeamMerchandise (mID INTEGER PRIMARY KEY, tID INTEGER, ProductName VARCHAR(30), PriceUSD DECIMAL, UnitsSold INTEGER, InStock BOOLEAN, DateOfNextShipment DATE, FOREIGN KEY (tID) REFERENCES Teams(tID));"
+
+    };
+
+
+
 
     String[] scottsSQLStatments = {};
     public static void main(String[] args) throws SQLException {
