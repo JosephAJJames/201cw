@@ -71,6 +71,24 @@ public class Code {
                 } finally {
                     //System.out.println("finished");
                 }
+
+
+
+                try { //inserting records
+                    List<String[]> recordList = reader.returnRecords();
+
+                    for (String[] record: recordList) {
+
+                        for (String valueInRecord : record) {
+
+                            
+
+                        }
+                    }
+
+                } catch (Exception e) {
+                    System.out.println("Heavy");
+                }
             }
 
         }
@@ -132,5 +150,11 @@ class CsvReader {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+    }
+
+    public List<String[]> returnRecords()
+    {
+        return this.allRows;
     }
 }
