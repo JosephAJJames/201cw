@@ -106,16 +106,22 @@ public class Code {
                                     break;
                             
                                 default:
-                                    //method to be used here
+                                    if (code.isLastElementInArray(record, valueInRecord)) {
+                                        SqlQuery = SqlQuery + ", " + valueInRecord + ")";
+                                    } else {
+                                        SqlQuery = SqlQuery + ", " + valueInRecord;
+                                    }
                                     break;
                             }
                             x++;
                         }
                     }
 
+                    System.out.println(SqlQuery);
+
                 } catch (Exception e) {
                     System.out.println("Heavy");
-                }
+                } finally {}
             }
 
         }
