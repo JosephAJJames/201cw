@@ -28,8 +28,6 @@ public class Code {
     String[] dannysSqlStatments = {
 
         //"DROP DATABASE IF EXISTS PremBusiness", "CREATE DATABASE PremBusiness;", "USE PremBusiness;",
-
-        
         //"CREATE TABLE Stadiums (sID INTEGER PRIMARY KEY NOT NULL, Capacity INTEGER NOT NULL, StadiumName VARCHAR(50) NOT NULL, YearBuilt INTEGER NOT NULL, PostCode VARCHAR(10) NOT NULL, IsActive BOOLEAN NOT NULL, AverageTicketSales INTEGER);",
         //"CREATE TABLE ShirtSponsors (ssID INTEGER PRIMARY KEY NOT NULL, ShirtSponsorName VARCHAR(50), CountryFounded VARCHAR(50), Owner VARCHAR(50), Website VARCHAR(50));",
         //"CREATE TABLE Teams (tID INTEGER PRIMARY KEY NOT NULL, TeamName VARCHAR(30), sID INTEGER, ssID INTEGER, YearFounded INTEGER, Website VARCHAR(60), FOREIGN KEY (sID) REFERENCES Stadiums(sID), FOREIGN KEY (ssID) REFERENCES ShirtSponsors(ssID));",
@@ -66,66 +64,10 @@ public class Code {
 
             String[][] statments = code.getSQLStatments();
 
-            for (String[] statmentsSQL : statments) { //starting on each set of querys for each person
-                
-                try {
-                    Statement statment = con.createStatement();
+            code.constructSchema(statments, con);
 
-                    for (String query: statmentsSQL) {
-
-                        String SQLQuery = query;
-
-                        statment.executeUpdate(SQLQuery);
-
-                        System.out.println(SQLQuery + "this statement has been executed");
-
-                    }
-
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    //System.out.println("finished");
-                }
-
-
-                try { //inserting records
-                    List<String[]> recordList = reader.returnRecords();
-
-                    String SqlQuery = "INSERT INTO (";
-
-                    for (String[] record: recordList) {
-                        int x = 0;
-                        
-                        for (String valueInRecord : record) {
-
-                            System.out.println("valueInRecord: " + valueInRecord);
-                            switch (x) {
-                                case 0:
-                                    SqlQuery = SqlQuery + valueInRecord + ") " + "VALUES" + "(";
-                                    break;
-                            
-                                default:
-                                    if (code.isLastElementInArray(record, valueInRecord)) {
-                                        SqlQuery = SqlQuery + ", " + valueInRecord + ")";
-                                    } else {
-                                        SqlQuery = SqlQuery + ", " + valueInRecord;
-                                    }
-                                    break;
-                            }
-                            x++;
-                        }
-                    }
-
-                    System.out.println(SqlQuery);
-
-                } catch (Exception e) {
-                    System.out.println("Heavy");
-                } finally {}
-            }
-
+            code.constructINSERTQuerys(reader);
         }
-
     }
 
     public String[][] getSQLStatments()
@@ -154,7 +96,80 @@ public class Code {
     {
         return (array[array.length - 1].equals(element));
     }
+
+    public void constructSchema(String[][] statments, Connection con) //Builds the current DB schema
+    {
+        for (String[] statmentsSQL : statments) { //starting on each set of querys for each person
+                
+            try {
+                Statement statment = con.createStatement();
+
+                for (String query: statmentsSQL) {
+
+                    String SQLQuery = query;
+
+                    statment.executeUpdate(SQLQuery);
+
+                    System.out.println(SQLQuery + "this statement has been executed");
+
+                }
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                //System.out.println("finished");
+            }
+        }    
+    }
+
+    public void constructINSERTQuerys(CsvReader reader) //reads from the csv and creates INSERT INTO Querys
+    {
+        try { //inserting records
+            List<String[]> recordList = reader.returnRecords();
+
+            System.out.println(recordList);
+
+            StringBuilder tableName = new StringBuilder();
+            StringBuilder values = new StringBuilder();
+
+            for (String[] record: recordList) {
+                int x = 0;
+                tableName = new StringBuilder();
+                values = new StringBuilder();
+
+                for (String valueInRecord : record) {
+                    if (x == 0) {
+                        tableName.append(valueInRecord);
+                    } else if (x == 1) {
+                        values.append(valueInRecord);
+                    } else {
+                        values.append("," + valueInRecord);
+                    }
+                    x++;
+                }
+
+                StringBuilder SqlQuery = new StringBuilder();
+                SqlQuery.append("INSERT INTO " + tableName + " VALUES(" + values + ")");
+                System.out.println("SqlQuery: " + SqlQuery);
+                //tableName = new StringBuilder();
+                //values = new StringBuilder();
+            }
+
+
+        } catch (Exception e) {
+            System.out.println("Heavy");
+        } finally {}
+    }
 }
+
+
+
+
+
+
+
+
 
 class CsvReader {
     BufferedReader bufferedReader;
@@ -192,6 +207,7 @@ class CsvReader {
 
     public List<String[]> returnRecords()
     {
+        this.readInFile();
         return this.allRows;
     }
 }
