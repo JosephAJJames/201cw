@@ -66,7 +66,7 @@ public class Code {
 
             code.constructSchema(statments, con);
 
-            code.constructINSERTQuerys(reader);
+            code.constructINSERTQuerys(reader, con);
         }
     }
 
@@ -123,44 +123,89 @@ public class Code {
         }    
     }
 
-    public void constructINSERTQuerys(CsvReader reader) //reads from the csv and creates INSERT INTO Querys
+    public void constructINSERTQuerys(CsvReader reader, Connection con) //reads from the csv and creates INSERT INTO Querys
     {
         try { //inserting records
             List<String[]> recordList = reader.returnRecords();
 
             System.out.println(recordList);
 
-            StringBuilder tableName = new StringBuilder();
-            StringBuilder values = new StringBuilder();
+            //StringBuilder tableName = new StringBuilder();
+            //StringBuilder values = new StringBuilder();
 
             for (String[] record: recordList) {
+                ArrayList<String> valuesToInsert = new ArrayList<String>();
+                String tableName = "";
                 int x = 0;
-                tableName = new StringBuilder();
-                values = new StringBuilder();
-
                 for (String valueInRecord : record) {
                     if (x == 0) {
-                        tableName.append(valueInRecord);
-                    } else if (x == 1) {
-                        values.append(valueInRecord);
-                    } else {
-                        values.append("," + valueInRecord);
+                        tableName = valueInRecord;
+
                     }
+
+                    valuesToInsert.add(valueInRecord);
+                
                     x++;
                 }
-
-                StringBuilder SqlQuery = new StringBuilder();
-                SqlQuery.append("INSERT INTO " + tableName + " VALUES(" + values + ")");
-                System.out.println("SqlQuery: " + SqlQuery);
-                //tableName = new StringBuilder();
-                //values = new StringBuilder();
+                //System.out.println(valuesToInsert + "........" + tableName);
+                this.makeJoesINSERTS(tableName, valuesToInsert, con);
             }
 
 
         } catch (Exception e) {
-            System.out.println("Heavy");
+            e.printStackTrace();
         } finally {}
     }
+
+    public void executeINSERTQuerys(Connection con, String query)
+    {
+        try {
+            Statement statment = con.createStatement();
+            int rows = statment.executeUpdate(query);
+            System.out.println(rows);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void makeJoesINSERTS(String tableName, ArrayList<String> valuesToInsert, Connection con) throws SQLException
+    {
+        System.out.println(tableName);
+        System.out.println(valuesToInsert);
+        String sql = "";
+        switch (tableName) {
+            case "Coaches":
+                sql = "INSERT INTO " + tableName +" VALUES(?, ?, ?, ?, ?)";
+                PreparedStatement statment =  con.prepareStatement(sql);
+                statment.setString(1, tableName);
+                for (int x = 1; x < valuesToInsert.size(); x++) {
+                    System.out.println(valuesToInsert.get(x));
+                    switch (x) { //used to put speech marks for varchar values
+                        case 2:
+                            String val = valuesToInsert.get(x);
+                            val = "'" + val + "'";
+                            statment.setString(2, val);
+                            break;
+
+                        case 3:
+                            String val1 = valuesToInsert.get(x);
+                            val1 = "'" + val1 + "'";
+                            statment.setString(3, val1);
+                            break;
+                        default:
+                            statment.setString(x, valuesToInsert.get(x));
+                    }
+                    //statment.setString(6, valuesToInsert.get(valuesToInsert.size() - 1));
+                }
+                Integer affectedRows = statment.executeUpdate();
+                System.out.println(affectedRows.toString() + "     query was executed");
+                break;
+            case "Referee":
+                break;
+        }
+    }
+
 }
 
 
