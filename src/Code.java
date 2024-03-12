@@ -49,6 +49,8 @@ public class Code {
         "CREATE TABLE TeamMerchandise (mID INTEGER PRIMARY KEY, tID INTEGER, ProductName VARCHAR(30), PriceUSD DECIMAL, UnitsSold INTEGER, InStock BOOLEAN, DateOfNextShipment DATE, FOREIGN KEY (tID) REFERENCES Teams(tID));"
     };
 
+    
+
 
 
 
@@ -170,6 +172,13 @@ public class Code {
         } finally {}
     }
 
+    public static PreparedStatement statetmentBuilder(PreparedStatement prepState, ArrayList<String> valuesToInsert)throws SQLException{ 
+        for (int x = 1; x < valuesToInsert.size(); x++) {
+            prepState.setString(x, valuesToInsert.get(x));
+        }
+        return prepState;
+    }
+
     public void makeJoesINSERTS(String tableName, ArrayList<String> valuesToInsert, Connection con) throws SQLException
     {
         String sql = "";
@@ -177,55 +186,28 @@ public class Code {
         switch (tableName) {
             case "Coaches":
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
-                statement = con.prepareStatement(sql);
-                for (int x = 1; x < valuesToInsert.size(); x++) {
-                    statement.setString(x, valuesToInsert.get(x));
-                }
                 break;
             case "Referees":
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
-                statement = con.prepareStatement(sql);
-                for (int x = 1; x < valuesToInsert.size(); x++) {
-                    statement.setString(x, valuesToInsert.get(x));
-                }
                 break;
             case "Teams":
-                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)"; 
-                statement = con.prepareStatement(sql);
-                for (int x = 1; x < valuesToInsert.size(); x++) {
-                    statement.setString(x, valuesToInsert.get(x));
-                }               
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";            
                 break;
             case "Fixtures":
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
-                statement = con.prepareStatement(sql);
-                for (int x = 1; x < valuesToInsert.size(); x++) {
-                    statement.setString(x, valuesToInsert.get(x));
-                }
                 break;
-
             case "Players":
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?)";
-                statement = con.prepareStatement(sql);
-                for (int x = 1; x < valuesToInsert.size(); x++) {
-                    statement.setString(x, valuesToInsert.get(x));
-                }
                 break;
             case "Tatics":
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
-                statement = con.prepareStatement(sql);
-                for (int x = 1; x < valuesToInsert.size(); x++) {
-                    statement.setString(x, valuesToInsert.get(x));
-                }
                 break;
             case "TeamMatchups":
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?)";
-                statement = con.prepareStatement(sql);
-                for (int x = 1; x < valuesToInsert.size(); x++) {
-                    statement.setString(x, valuesToInsert.get(x));
-                }
-                break;
+                break; 
         }
+        statement = con.prepareStatement(sql);
+        statetmentBuilder(statement, valuesToInsert);
         Integer rowsAffected = statement.executeUpdate();
         System.out.println("Number of rows affeced: " + rowsAffected.toString());
     }
