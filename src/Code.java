@@ -25,6 +25,11 @@ public class Code {
 
             };
 
+
+    String[] joesSELECTQuerys = {"SELECT * FROM Teams JOIN Coaches ON Teams.cID = Coaches.cID",
+                                "SELECT * FROM Coaches",
+                                "SELECT * FROM Teams"};
+
     String[] dannysSqlStatments = {
 
         //"DROP DATABASE IF EXISTS PremBusiness", "CREATE DATABASE PremBusiness;", "USE PremBusiness;",
@@ -46,7 +51,6 @@ public class Code {
 
         Code code = new Code();
         String url = "jdbc:mysql://localhost:3306/";
-        System.out.println("Trying to connect....");
         Connection con = connect(url);
 
         if (con == null) {
@@ -54,19 +58,18 @@ public class Code {
             System.exit(0);
         }
 
-        System.out.println("Connected Succesfully");
-
         String[] csvArray = {"38639416.csv"};
         for (String filenumber: csvArray) {
 
-
-            CsvReader reader = new CsvReader("src/38639416.csv");
+            CsvReader reader = new CsvReader("src/" + filenumber);
 
             String[][] statments = code.getSQLStatments();
 
             code.constructSchema(statments, con);
 
             code.constructINSERTQuerys(reader, con);
+
+            code.performJoesSELECTS(con);
         }
     }
 
@@ -80,16 +83,23 @@ public class Code {
         };
     }
 
+    public String[] getSELECTQueries()
+    {
+        return this.joesSELECTQuerys;
+    }
+
 
     public static Connection connect(String url) throws SQLException
     {
-            try {
-                Connection con = DriverManager.getConnection(url);
-                return con;
-            } catch (Exception e) {
-                System.out.println("Failed to connect...:\n"+ e);
-            }
-            return null;
+        System.out.println("Trying to connect....");
+        try {
+            Connection con = DriverManager.getConnection(url);
+            System.out.println("Connected Succesfully");
+            return con;
+        } catch (Exception e) {
+            System.out.println("Failed to connect...:\n"+ e);
+        }
+        return null;
     }
 
     public boolean isLastElementInArray(String[] array, String element)
@@ -99,6 +109,7 @@ public class Code {
 
     public void constructSchema(String[][] statments, Connection con) //Builds the current DB schema
     {
+        System.out.println("Making Schema.....");
         for (String[] statmentsSQL : statments) { //starting on each set of querys for each person
                 
             try {
@@ -110,17 +121,16 @@ public class Code {
 
                     statment.executeUpdate(SQLQuery);
 
-                    System.out.println(SQLQuery + "this statement has been executed");
+                    System.out.println(SQLQuery + " this statement has been executed");
 
                 }
 
 
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                //System.out.println("finished");
             }
-        }    
+        }
+        System.out.println("Schema has been constructed");   
     }
 
     public void constructINSERTQuerys(CsvReader reader, Connection con) //reads from the csv and creates INSERT INTO Querys
@@ -128,10 +138,7 @@ public class Code {
         try { //inserting records
             List<String[]> recordList = reader.returnRecords();
 
-            System.out.println(recordList);
-
-            //StringBuilder tableName = new StringBuilder();
-            //StringBuilder values = new StringBuilder();
+ 
 
             for (String[] record: recordList) {
                 ArrayList<String> valuesToInsert = new ArrayList<String>();
@@ -140,14 +147,12 @@ public class Code {
                 for (String valueInRecord : record) {
                     if (x == 0) {
                         tableName = valueInRecord;
-
                     }
 
                     valuesToInsert.add(valueInRecord);
                 
                     x++;
                 }
-                //System.out.println(valuesToInsert + "........" + tableName);
                 this.makeJoesINSERTS(tableName, valuesToInsert, con);
             }
 
@@ -157,30 +162,17 @@ public class Code {
         } finally {}
     }
 
-    public void executeINSERTQuerys(Connection con, String query)
-    {
-        try {
-            Statement statment = con.createStatement();
-            int rows = statment.executeUpdate(query);
-            System.out.println(rows);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void makeJoesINSERTS(String tableName, ArrayList<String> valuesToInsert, Connection con) throws SQLException
     {
-        System.out.println(tableName);
-        System.out.println(valuesToInsert);
         String sql = "";
         switch (tableName) {
             case "Coaches":
+
                 sql = "INSERT INTO " + tableName +" VALUES(?, ?, ?, ?, ?)";
                 PreparedStatement statment =  con.prepareStatement(sql);
                 statment.setString(1, tableName);
                 for (int x = 1; x < valuesToInsert.size(); x++) {
-                    System.out.println(valuesToInsert.get(x));
+                    
                     switch (x) { //used to put speech marks for varchar values
                         case 2:
                             String val = valuesToInsert.get(x);
@@ -196,13 +188,73 @@ public class Code {
                         default:
                             statment.setString(x, valuesToInsert.get(x));
                     }
-                    //statment.setString(6, valuesToInsert.get(valuesToInsert.size() - 1));
+                    
                 }
                 Integer affectedRows = statment.executeUpdate();
-                System.out.println(affectedRows.toString() + "     query was executed");
+                System.out.println(affectedRows.toString() + "rows were affected, query was executed");
                 break;
-            case "Referee":
+            case "Referees":
+                
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
+                PreparedStatement statement = con.prepareStatement(sql);
+                statement.setString(1, tableName);
+                for (int x = 1; x < valuesToInsert.size(); x++) {
+                    switch (x) {
+                        case 2:
+                            String val = "'" + valuesToInsert.get(x) + "'";
+                            statement.setString(2, val);
+                            break;
+
+                        case 3:
+                            String val1 = "'" + valuesToInsert.get(x) + "'";
+                            statement.setString(3, val1);
+                            break;
+                        default:
+                            statement.setString(x, valuesToInsert.get(x));
+                    }
+                }
+                Integer affectedRowss = statement.executeUpdate();
+                System.out.println(affectedRowss.toString() + "rowss were affected, query was executed");
                 break;
+
+            case "Teams":
+                
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
+                PreparedStatement statement2 = con.prepareStatement(sql);
+                statement2.setString(1, tableName);
+                for (int x = 1; x < valuesToInsert.size(); x++) {
+                    switch (x) {
+                        case 2:
+                            String val = "'" + valuesToInsert.get(x) + "'";
+                            statement2.setString(2, val);
+                            break;
+                        case 3:
+                            String val1 = "'" + valuesToInsert.get(x) + "'";
+                            statement2.setString(3, val1);
+                            break;
+                        case 7:
+                            String val2 = "'" + valuesToInsert.get(x) + "'";
+                            statement2.setString(7, val2);
+                            break;
+                        default:
+                            statement2.setString(x, valuesToInsert.get(x));
+                            break;
+                    }
+                }
+                Integer affectedRowsss = statement2.executeUpdate();
+                System.out.println(affectedRowsss.toString() + "rowsss were affected, query was executed");
+
+
+        }
+    }
+
+    public void performJoesSELECTS(Connection con) throws SQLException
+    {
+        String[] querys = this.getSELECTQueries();
+        Statement currentStatment = con.createStatement();
+        for (String currentQuery: querys) {
+            ResultSet rSet = currentStatment.executeQuery(currentQuery);
+            System.out.println(currentQuery + ": " + rSet);
         }
     }
 
