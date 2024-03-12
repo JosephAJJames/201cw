@@ -147,6 +147,7 @@ public class Code {
                 for (String valueInRecord : record) {
                     if (x == 0) {
                         tableName = valueInRecord;
+                        System.out.println(tableName);
                     }
 
                     valuesToInsert.add(valueInRecord);
@@ -165,88 +166,63 @@ public class Code {
     public void makeJoesINSERTS(String tableName, ArrayList<String> valuesToInsert, Connection con) throws SQLException
     {
         String sql = "";
+        PreparedStatement statement = con.prepareStatement(" ");
         switch (tableName) {
             case "Coaches":
-
-                sql = "INSERT INTO " + tableName +" VALUES(?, ?, ?, ?, ?)";
-                PreparedStatement statment =  con.prepareStatement(sql);
-                statment.setString(1, tableName);
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
+                statement = con.prepareStatement(sql);
                 for (int x = 1; x < valuesToInsert.size(); x++) {
-                    
-                    switch (x) { //used to put speech marks for varchar values
-                        case 2:
-                            String val = valuesToInsert.get(x);
-                            val = "'" + val + "'";
-                            statment.setString(2, val);
-                            break;
-
-                        case 3:
-                            String val1 = valuesToInsert.get(x);
-                            val1 = "'" + val1 + "'";
-                            statment.setString(3, val1);
-                            break;
-                        default:
-                            statment.setString(x, valuesToInsert.get(x));
-                    }
-                    
+                    statement.setString(x, valuesToInsert.get(x));
                 }
-                Integer affectedRows = statment.executeUpdate();
-                System.out.println(affectedRows.toString() + "rows were affected, query was executed");
                 break;
             case "Referees":
-                
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
-                PreparedStatement statement = con.prepareStatement(sql);
-                statement.setString(1, tableName);
+                statement = con.prepareStatement(sql);
                 for (int x = 1; x < valuesToInsert.size(); x++) {
-                    switch (x) {
-                        case 2:
-                            String val = "'" + valuesToInsert.get(x) + "'";
-                            statement.setString(2, val);
-                            break;
-
-                        case 3:
-                            String val1 = "'" + valuesToInsert.get(x) + "'";
-                            statement.setString(3, val1);
-                            break;
-                        default:
-                            statement.setString(x, valuesToInsert.get(x));
-                    }
+                    statement.setString(x, valuesToInsert.get(x));
                 }
-                Integer affectedRowss = statement.executeUpdate();
-                System.out.println(affectedRowss.toString() + "rowss were affected, query was executed");
+                break;
+            case "Teams":
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)"; 
+                statement = con.prepareStatement(sql);
+                for (int x = 1; x < valuesToInsert.size(); x++) {
+                    statement.setString(x, valuesToInsert.get(x));
+                }               
+                break;
+            case "Fixtures":
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
+                statement = con.prepareStatement(sql);
+                for (int x = 1; x < valuesToInsert.size(); x++) {
+                    statement.setString(x, valuesToInsert.get(x));
+                }
                 break;
 
-            case "Teams":
-                
-                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
-                PreparedStatement statement2 = con.prepareStatement(sql);
-                statement2.setString(1, tableName);
+            case "Players":
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?)";
+                statement = con.prepareStatement(sql);
                 for (int x = 1; x < valuesToInsert.size(); x++) {
-                    switch (x) {
-                        case 2:
-                            String val = "'" + valuesToInsert.get(x) + "'";
-                            statement2.setString(2, val);
-                            break;
-                        case 3:
-                            String val1 = "'" + valuesToInsert.get(x) + "'";
-                            statement2.setString(3, val1);
-                            break;
-                        case 7:
-                            String val2 = "'" + valuesToInsert.get(x) + "'";
-                            statement2.setString(7, val2);
-                            break;
-                        default:
-                            statement2.setString(x, valuesToInsert.get(x));
-                            break;
-                    }
+                    statement.setString(x, valuesToInsert.get(x));
                 }
-                Integer affectedRowsss = statement2.executeUpdate();
-                System.out.println(affectedRowsss.toString() + "rowsss were affected, query was executed");
-
-
+                break;
+            case "Tatics":
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
+                statement = con.prepareStatement(sql);
+                for (int x = 1; x < valuesToInsert.size(); x++) {
+                    statement.setString(x, valuesToInsert.get(x));
+                }
+                break;
+            case "TeamMatchups":
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?)";
+                statement = con.prepareStatement(sql);
+                for (int x = 1; x < valuesToInsert.size(); x++) {
+                    statement.setString(x, valuesToInsert.get(x));
+                }
+                break;
         }
+        Integer rowsAffected = statement.executeUpdate();
+        System.out.println("Number of rows affeced: " + rowsAffected.toString());
     }
+
 
     public void performJoesSELECTS(Connection con) throws SQLException
     {
@@ -254,7 +230,33 @@ public class Code {
         Statement currentStatment = con.createStatement();
         for (String currentQuery: querys) {
             ResultSet rSet = currentStatment.executeQuery(currentQuery);
-            System.out.println(currentQuery + ": " + rSet);
+            printResultSet(rSet);
+        }
+    }
+
+    public static void printResultSet(ResultSet rs) {
+        try {
+            
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int columnCount = rsmd.getColumnCount();
+
+            
+            for (int i = 1; i <= columnCount; i++) {
+                if (i > 1) System.out.print(",  ");
+                System.out.print(rsmd.getColumnName(i));
+            }
+            System.out.println();
+
+            
+            while (rs.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    if (i > 1) System.out.print(",  ");
+                    System.out.print(rs.getString(i));
+                }
+                System.out.println();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
