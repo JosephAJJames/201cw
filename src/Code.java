@@ -67,14 +67,25 @@ public class Code {
             System.exit(0);
         }
 
-        String[] csvArray = {"38639416.csv"};
+        String[] csvArray = {"38639416.csv", "38790475.csv"};
         for (String filenumber: csvArray) {
 
             CsvReader reader = new CsvReader("src/" + filenumber);
-
+            String[] schema = {};
             String[][] statments = code.getSQLStatments();
 
-            code.constructSchema(statments, con);
+            switch (filenumber) {
+                case "38639416.csv":
+                    schema = statements[0];
+                    break;
+                case "38790475.csv":
+                    schema = statements[1];
+                    break;
+            }
+
+            s
+
+            code.constructSchema(schema, con);
 
             code.constructINSERTQuerys(reader, con);
 
@@ -116,28 +127,23 @@ public class Code {
         return (array[array.length - 1].equals(element));
     }
 
-    public void constructSchema(String[][] statments, Connection con) //Builds the current DB schema
+    public void constructSchema(String[] schema, Connection con) //Builds the current DB schema
     {
-        System.out.println("Making Schema.....");
-        for (String[] statmentsSQL : statments) { //starting on each set of querys for each person
-                
-            try {
-                Statement statment = con.createStatement();
+        System.out.println("Making Schema....."); 
+        try {
+            Statement statment = con.createStatement();
 
-                for (String query: statmentsSQL) {
+            for (String query: schema) {
 
-                    String SQLQuery = query;
+                String SQLQuery = query;
 
-                    statment.executeUpdate(SQLQuery);
+                statment.executeUpdate(SQLQuery);
 
-                    System.out.println(SQLQuery + " this statement has been executed");
+                System.out.println(SQLQuery + " this statement has been executed");
 
-                }
-
-
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+                e.printStackTrace();
         }
         System.out.println("Schema has been constructed");   
     }
@@ -272,11 +278,6 @@ class CsvReader {
             e.printStackTrace();
         }
     }
-
-    public static void main(String[] args) {
-        CsvReader reader = new CsvReader("src/38639416.csv");
-    }
-
 
     public void readInFile()
     {
