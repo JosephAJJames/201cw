@@ -72,7 +72,7 @@ public class Code {
 
             CsvReader reader = new CsvReader("src/" + filenumber);
             String[] schema = {};
-            String[][] statments = code.getSQLStatments();
+            String[][] statements = code.getSQLStatments();
 
             switch (filenumber) {
                 case "38639416.csv":
@@ -82,8 +82,6 @@ public class Code {
                     schema = statements[1];
                     break;
             }
-
-            s
 
             code.constructSchema(schema, con);
 
