@@ -81,6 +81,8 @@ public class Code {
                 case "38790475.csv":
                     schema = statements[1];
                     break;
+                default:
+                    System.out.println("Scott you need to put all your shite in here please get coding soon");
             }
 
             code.constructSchema(schema, con);
