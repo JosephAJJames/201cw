@@ -30,6 +30,10 @@ public class Code {
                                 "SELECT * FROM Coaches",
                                 "SELECT * FROM Teams"};
 
+    String[] dannysSELECTQuerys = {"SELECT * FROM Teams"};
+
+    String[] scottsSELECTQuerys = {""};
+
     String[] dannysSqlStatments = {
 
         "DROP DATABASE IF EXISTS PremBusiness", "CREATE DATABASE PremBusiness;", "USE PremBusiness;",
@@ -40,7 +44,7 @@ public class Code {
 
         "CREATE TABLE Teams (tID INTEGER PRIMARY KEY NOT NULL, TeamName VARCHAR(30), sID INTEGER, ssID INTEGER, YearFounded INTEGER NOT NULL CHECK (YearFounded >= 1857), Website VARCHAR(60), FOREIGN KEY (sID) REFERENCES Stadiums(sID), FOREIGN KEY (ssID) REFERENCES ShirtSponsors(ssID));",
 
-        "CREATE TABLE Players(pID INT PRIMARY KEY NOT NULL, tID INT, StrongFoot VARCHAR(1), DOB DATE, WeightKG INT CHECK (), ShirtNum INT, FOREIGN KEY (tID) REFERENCES Teams(tID));",
+        "CREATE TABLE Players(pID INT PRIMARY KEY NOT NULL, tID INT, StrongFoot VARCHAR(1), DOB DATE, WeightKG INT, ShirtNum INT, FOREIGN KEY (tID) REFERENCES Teams(tID));",
 
         "CREATE TABLE Contracts (cID INTEGER PRIMARY KEY, pID INTEGER UNIQUE, ContractType VARCHAR(20), WeeklySalaryUSD DECIMAL, DateSigned DATE, ExpiryDate DATE, Active BOOLEAN, FOREIGN KEY (pID) REFERENCES Players(pID));",
 
@@ -62,24 +66,24 @@ public class Code {
         String url = "jdbc:mysql://localhost:3306/";
         Connection con = connect(url);
 
-        if (con == null) {
+        if (con == null) { //was connection succesfull?
             System.out.print("Issue with connecting to mySQL server\nProgram closing...");
-            System.exit(0);
+            System.exit(0); //close program, if server isnt connected then nothing else is going to work
         }
 
         String[] csvArray = {"38639416.csv", "38790475.csv"};
-        for (String filenumber: csvArray) {
+        for (String filenumber: csvArray) { //loop over the csv file names array
 
-            CsvReader reader = new CsvReader("src/" + filenumber);
-            String[] schema = {};
+            CsvReader reader = new CsvReader("src/" + filenumber); //make new csv reader with current csv file
+            String[] schema = {}; //will hold the sql statments to make current group members schema
             String[][] statements = code.getSQLStatments();
 
-            switch (filenumber) {
+            switch (filenumber) { //whos schema are we making?
                 case "38639416.csv":
-                    schema = statements[0];
+                    schema = statements[0]; //make the schema array Joe's SQL statments
                     break;
                 case "38790475.csv":
-                    schema = statements[1];
+                    schema = statements[1]; //make the schema array Danny's SQL statments
                     break;
                 default:
                     System.out.println("Scott you need to put all your shite in here please get coding soon");
@@ -87,9 +91,9 @@ public class Code {
 
             code.constructSchema(schema, con);
 
-            code.constructINSERTQuerys(reader, con);
+            code.constructINSERTQuerys(reader, con, filenumber);
 
-            code.performJoesSELECTS(con);
+            code.performSELECTS(con, filenumber);
         }
     }
 
@@ -103,9 +107,15 @@ public class Code {
         };
     }
 
-    public String[] getSELECTQueries()
+    public String[] getSELECTQueries(String filename)
     {
-        return this.joesSELECTQuerys;
+        if (filename.equals(new String("38639416.csv"))) {
+            return this.joesSELECTQuerys;
+        } else if (filename.equals(new String("38790475.csv"))) {
+            return this.dannysSELECTQuerys;
+        } else {
+            return this.scottsSELECTQuerys;
+        }
     }
 
 
@@ -148,7 +158,7 @@ public class Code {
         System.out.println("Schema has been constructed");   
     }
 
-    public void constructINSERTQuerys(CsvReader reader, Connection con) //reads from the csv and creates INSERT INTO Querys
+    public void constructINSERTQuerys(CsvReader reader, Connection con, String filename) //reads from the csv and creates INSERT INTO Querys
     {
         try { //inserting records
             List<String[]> recordList = reader.returnRecords();
@@ -160,8 +170,8 @@ public class Code {
                 String tableName = "";
                 int x = 0;
                 for (String valueInRecord : record) {
-                    if (x == 0) {
-                        tableName = valueInRecord;
+                    if (x == 0) {   //first element of a record will always be table name
+                        tableName = valueInRecord; 
                         System.out.println(tableName);
                     }
 
@@ -169,7 +179,16 @@ public class Code {
                 
                     x++;
                 }
-                this.makeJoesINSERTS(tableName, valuesToInsert, con);
+
+                switch (filename) {
+                    case "38639416.csv":
+                        this.makeJoesINSERTS(tableName, valuesToInsert, con);
+                        break;
+                    
+                    case "38790475.csv":
+                        this.makeDannysINSERTS(tableName, valuesToInsert, con);
+                        break;
+                }
             }
 
 
@@ -183,6 +202,46 @@ public class Code {
             prepState.setString(x, valuesToInsert.get(x));
         }
         return prepState;
+    }
+
+    public void makeDannysINSERTS(String tableName, ArrayList<String> valuesToInsert, Connection con) throws SQLException
+    {
+        String sql = "";
+        PreparedStatement statement = con.prepareStatement(" ");
+        switch (tableName) {
+            case "Stadiums":
+                sql = "INSERT INTO  " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
+                break;
+        
+            case "ShirtSponsors":
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
+                break;
+
+            case "Teams":
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
+                break;
+            
+            case "Players":
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
+                break;
+            
+            case "Contracts":
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
+                break;
+
+            case "Injuries":
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
+                break;
+
+            case "TeamMerchandise":
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
+                break;
+        }
+        statement = con.prepareStatement(sql);
+        statetmentBuilder(statement, valuesToInsert);
+        Integer rowsAffected = statement.executeUpdate();
+        System.out.println("Number of rows affected: " + rowsAffected.toString());
+
     }
 
     public void makeJoesINSERTS(String tableName, ArrayList<String> valuesToInsert, Connection con) throws SQLException
@@ -219,9 +278,9 @@ public class Code {
     }
 
 
-    public void performJoesSELECTS(Connection con) throws SQLException
+    public void performSELECTS(Connection con, String filename) throws SQLException
     {
-        String[] querys = this.getSELECTQueries();
+        String[] querys = this.getSELECTQueries(filename);
         Statement currentStatment = con.createStatement();
         for (String currentQuery: querys) {
             ResultSet rSet = currentStatment.executeQuery(currentQuery);
@@ -256,11 +315,6 @@ public class Code {
     }
 
 }
-
-
-
-
-
 
 
 
