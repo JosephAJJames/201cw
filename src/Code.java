@@ -7,28 +7,29 @@ import java.util.List;
 
 public class Code {
 
-    String[] joesSQLStatments = {"DROP DATABASE IF EXISTS PremGames" ,"CREATE DATABASE PremGames;", "USE PremGames;",
+    String[] joesSQLStatments = {"DROP DATABASE IF EXISTS PremGames" ,"CREATE DATABASE PremGames;", "USE PremGames;", 
 
-            "CREATE TABLE Coaches(cID INT PRIMARY KEY NOT NULL, FirstName VARCHAR(25), LastName VARCHAR(25), NumberOfTrophies INT, HasTeam BOOLEAN)",
+            "CREATE TABLE Coaches(cID INT PRIMARY KEY NOT NULL, FirstName VARCHAR(25), LastName VARCHAR(25), NumberOfTrophies INT, HasTeam BOOLEAN)", //parent table, //cant delete coach if they are being used in the teams table,
+            
+            "CREATE TABLE Stadiums(sID INT PRIMARY KEY NOT NULL, Name VARCHAR(25), Capacity INT NOT NULL, NoOfStands INT NOT NULL, tID INT UNIQUE)", //child of the Teams table, tid can be null as a stadium might not be in use
 
-            "CREATE TABLE Tactics(tID INT PRIMARY KEY NOT NULL,cID INT , PosStyle VARCHAR(10), Formation VARCHAR(10), TacticName VARCHAR(25), FOREIGN KEY (cID) REFERENCES Coaches(cID));",
+            "CREATE TABLE Teams(tID INT PRIMARY KEY NOT NULL, sID INT, TeamName VARCHAR(25), Region VARCHAR(25), YearFounded INT, PlaysInUCL BOOLEAN, cID INT UNIQUE, Owner VARCHAR(30), FOREIGN KEY (sID) REFERENCES Stadiums(sID) ON DELETE RESTRICT ,FOREIGN KEY (cID) REFERENCES Coaches(cID) ON DELETE RESTRICT)", //child table of coaches, can't delete a team if its in use in players
 
-            "CREATE TABLE Teams(tID INT PRIMARY KEY NOT NULL, TeamName VARCHAR(25), Region VARCHAR(25), YearFounded INT, PlaysInUCL BOOLEAN, cID INT UNIQUE, Owner VARCHAR(30))",
+            "CREATE TABLE Referees(rID INT PRIMARY KEY NOT NULL, FirstName VARCHAR(25), LastName VARCHAR(25), yCardsThisYear INT, rCardsThisYear INT)", //parent table
+            
+            "CREATE TABLE Fixtures(fID INT PRIMARY KEY NOT NULL, KickOff DATETIME, WeatherConditions VARCHAR (25), HomeScore INT, AwayScore INT, rID INT, FOREIGN KEY (rID) REFERENCES Referees(rID) ON DELETE RESTRICT);", //parent table   //referee would be NOT NULL however, referees for future games have not yet been decided
 
-            "CREATE TABLE Referees(rID INT PRIMARY KEY NOT NULL, FirstName VARCHAR(25), LastName VARCHAR(25), yCardsThisYear INT, rCardsThisYear INT)",
+            "CREATE TABLE TeamMatchups(tmID INT PRIMARY KEY NOT NULL, HomeTeam INT NOT NULL, AwayTeam INT NOT NULL, fID INT, FOREIGN KEY (HomeTeam) REFERENCES Teams(tID) ON DELETE RESTRICT, FOREIGN KEY (AwayTeam) REFERENCES Teams(tID) ON DELETE RESTRICT, FOREIGN KEY (fID) REFERENCES Fixtures(fID) ON DELETE RESTRICT);", //child table of teams
 
-            "CREATE TABLE TeamMatchups(tmID INT PRIMARY KEY NOT NULL, HomeTeam INT NOT NULL, AwayTeam INT NOT NULL, FOREIGN KEY (HomeTeam) REFERENCES Teams(tID), FOREIGN KEY (AwayTeam) REFERENCES Teams(tID));",
-
-            "CREATE TABLE Fixtures(fID INT PRIMARY KEY NOT NULL, KickOff DATETIME, WeatherConditions VARCHAR (25), HomeScore INT, AwayScore INT, rID INT, FOREIGN KEY (rID) REFERENCES Referees(rID), tmID Integer NOT NULL UNIQUE, FOREIGN KEY (tmID) REFERENCES TeamMatchups(tmID));",   //referee would be NOT NULL however, referees for future games have not yet been decided
-
-            "CREATE TABLE Players(pID INT PRIMARY KEY NOT NULL, tID INT, Position VARCHAR(5), DOB DATE, HeightCM INT, ShirtNum INT, FOREIGN KEY (tID) REFERENCES Teams(tID));"
+            "CREATE TABLE Players(pID INT PRIMARY KEY NOT NULL, tID INT, Position VARCHAR(5), DOB DATE, HeightCM INT, ShirtNum INT, FOREIGN KEY (tID) REFERENCES Teams(tID) ON DELETE RESTRICT);", //Parent table, can't delete a team thats being used
 
             };
 
 
     String[] joesSELECTQuerys = {"SELECT * FROM Teams JOIN Coaches ON Teams.cID = Coaches.cID",
                                 "SELECT * FROM Coaches",
-                                "SELECT * FROM Teams"};
+                                "SELECT * FROM Teams",
+                                "SELECT Teams.Region, SUM(Stadiums.Capacity) AS TotalCapacity FROM Teams JOIN Stadiums ON Teams.sID = Stadiums.sID GROUP BY (Teams.Region) HAVING SUM(Stadiums.Capacity) > 0;"};
 
     String[] dannysSELECTQuerys = {"SELECT * FROM Teams"};
 
@@ -218,7 +219,7 @@ public class Code {
                 break;
 
             case "Teams":
-                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
+                sql = "INSERT INTO " + tableName + " VALUES(? ,?, ?, ?, ?, ?, ?, ?)";
                 break;
             
             case "Players":
@@ -256,7 +257,7 @@ public class Code {
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
                 break;
             case "Teams":
-                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";            
+                sql = "INSERT INTO " + tableName + " VALUES(? ,?, ?, ?, ?, ?, ?, ?)";            
                 break;
             case "Fixtures":
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
@@ -264,7 +265,7 @@ public class Code {
             case "Players":
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?)";
                 break;
-            case "Tatics":
+            case "Stadiums":
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
                 break;
             case "TeamMatchups":
