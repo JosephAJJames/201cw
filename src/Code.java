@@ -26,10 +26,11 @@ public class Code {
             };
 
 
-    String[] joesSELECTQuerys = {"SELECT * FROM Teams JOIN Coaches ON Teams.cID = Coaches.cID",
-                                "SELECT * FROM Coaches",
-                                "SELECT * FROM Teams",
-                                "SELECT Teams.Region, SUM(Stadiums.Capacity) AS TotalCapacity FROM Teams JOIN Stadiums ON Teams.sID = Stadiums.sID GROUP BY (Teams.Region) HAVING SUM(Stadiums.Capacity) > 0;"};
+    String[] joesSELECTQuerys = {
+                                "SELECT Teams.Region, SUM(Stadiums.Capacity) AS TotalCapacity FROM Teams JOIN Stadiums ON Teams.sID = Stadiums.sID GROUP BY (Teams.Region) HAVING SUM(Stadiums.Capacity) > 0;",
+                                };
+
+    String[] joesDELETEQuerys = {"DELETE FROM Teams WHERE Teams.tID = 1;"};
 
     String[] dannysSELECTQuerys = {"SELECT * FROM Teams"};
 
@@ -95,6 +96,31 @@ public class Code {
             code.constructINSERTQuerys(reader, con, filenumber);
 
             code.performSELECTS(con, filenumber);
+
+            code.performDeletions(con, filenumber);
+        }
+    }
+
+    public void performDeletions(Connection con, String filename)
+    {
+        String[] queries = this.getDELETEQuerys(filename);
+        for (String query : queries) {
+            try {
+                Statement statment = con.createStatement();
+                Integer rows = statment.executeUpdate(query);
+                System.out.println("Rows Deleted: " + rows.toString());
+            } catch (Exception e) {
+                System.out.println("An error occured: " + e.getMessage());
+            }
+        }
+    }
+
+    public String[] getDELETEQuerys(String filename)
+    {
+        if (filename.equals(new String("38639416.csv"))) {
+            return this.joesDELETEQuerys;
+        } else {
+            return null;
         }
     }
 
@@ -263,6 +289,9 @@ public class Code {
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
                 break;
             case "Players":
+            for (int x = 0; x < valuesToInsert.size(); x++) {
+                System.out.println("value: " + valuesToInsert.get(x));
+            }
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?)";
                 break;
             case "Stadiums":
