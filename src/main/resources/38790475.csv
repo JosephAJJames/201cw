@@ -1,0 +1,15 @@
+Stadiums: sID, Capacity, StadiumName, YearBuilt, PostCode, IsActive, AverageTicketSales
+ShirtSponsors: ssID, ShirtSponsorName, ComNationISO3166-1alpha-2, Owner, Website
+Teams: tID, TeamName, sID, ssID, YearFounded, Website
+Players: pID, tID, StrongFoot, DOB, WeightKG, ShirtNum
+Contracts: cID, pID, ContractType, WeeklySalaryUSD, DateSigned, ExpiryDate, Active
+Injuries: iID, pID, DateOfInjury, DateOfRecovery, TypeOfInjury
+TeamMerchandise: mID, tID, ProductName, PriceUSD, UnitsSold, InStock, DateOfNextShipment
+
+
+Stadiums, 1, 61000, "Anfield", 1884, "L4 0TH", 1, 60372
+Stadiums, 2, 53400, "Empty-had", 2003, "M11 3FF", 1, 48745
+Stadiums, 3, 35670, "Maine Road", 1923, "M14 7WN", 0, NULL
+Stadiums, 4, 36284, "White Heart Lane", 1899, "36,284", 0, NULL
+
+ShirtSponsors, 1, "Standard Chartered", "GB", "Bill Winters", "https://www.sc.com"
