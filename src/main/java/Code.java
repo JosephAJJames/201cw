@@ -27,10 +27,11 @@ public class Code {
 
 
     String[] joesSELECTQuerys = {
-                                "SELECT Teams.Region, SUM(Stadiums.Capacity) AS TotalCapacity FROM Teams JOIN Stadiums ON Teams.sID = Stadiums.sID GROUP BY (Teams.Region) HAVING SUM(Stadiums.Capacity) > 0;",
-                                };
+                                "SELECT Teams.Region, SUM(Stadiums.Capacity) AS TotalCapacity FROM Teams JOIN Stadiums ON Teams.sID = Stadiums.sID GROUP BY (Teams.Region) HAVING SUM(Stadiums.Capacity) > 0;"
+    };
 
-    String[] joesDELETEQuerys = {"DELETE FROM Teams WHERE Teams.tID = 1;"};
+    String[] joesDELETEQuerys = {"DELETE FROM Teams WHERE Teams.tID = 1;",
+                                "DELETE FROM Stadiums WHERE Stadiums.sID = 1;"};
 
     String[] dannysSELECTQuerys = {"SELECT * FROM Teams"};
 
