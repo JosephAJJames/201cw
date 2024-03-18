@@ -73,7 +73,7 @@ public class Code {
             System.exit(0); //close program, if server isnt connected then nothing else is going to work
         }
 
-        String[] csvArray = {"38639416.csv", "38790475.csv"};
+        String[] csvArray = {"/main/resources/38639416.csv", "/main/resources/38790475.csv"};
         for (String filenumber: csvArray) { //loop over the csv file names array
 
             CsvReader reader = new CsvReader("src/" + filenumber); //make new csv reader with current csv file
