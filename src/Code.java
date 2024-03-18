@@ -77,7 +77,7 @@ public class Code {
         String[] csvArray = {"/main/resources/38639416.csv", "/main/resources/38790475.csv"};
         for (String filenumber: csvArray) { //loop over the csv file names array
 
-            CsvReader reader = new CsvReader("src/" + filenumber); //make new csv reader with current csv file
+            CsvReader reader = new CsvReader("src/resources" + filenumber); //make new csv reader with current csv file
             String[] schema = {}; //will hold the sql statments to make current group members schema
             String[][] statements = code.getSQLStatments();
 
