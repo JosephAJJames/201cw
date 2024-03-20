@@ -1,0 +1,10 @@
+java.sql.SQLTransientConnectionException: (conn=37) Incorrect integer value: ' NULL' for column 'AverageTicketSales' at row 1
+        at org.mariadb.jdbc.internal.util.exceptions.ExceptionFactory.createException(ExceptionFactory.java:79)
+        at org.mariadb.jdbc.internal.util.exceptions.ExceptionFactory.create(ExceptionFactory.java:158)
+        at org.mariadb.jdbc.MariaDbStatement.executeExceptionEpilogue(MariaDbStatement.java:266)
+        at org.mariadb.jdbc.ClientSidePreparedStatement.executeInternal(ClientSidePreparedStatement.java:229)
+        at org.mariadb.jdbc.ClientSidePreparedStatement.execute(ClientSidePreparedStatement.java:149)
+        at org.mariadb.jdbc.ClientSidePreparedStatement.executeUpdate(ClientSidePreparedStatement.java:181)
+        at Code.makeDannysINSERTS(Code.java:271)
+        at Code.constructINSERTQuerys(Code.java:217)
+        at Code.main(Code.java:97)

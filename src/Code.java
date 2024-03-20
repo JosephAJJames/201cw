@@ -41,9 +41,9 @@ public class Code {
 
         "DROP DATABASE IF EXISTS PremBusiness", "CREATE DATABASE PremBusiness;", "USE PremBusiness;",
 
-        "CREATE TABLE Stadiums (sID INTEGER PRIMARY KEY NOT NULL, Capacity INTEGER NOT NULL CHECK (Capacity >= 0), StadiumName VARCHAR(50) NOT NULL, YearBuilt INTEGER NOT NULL CHECK (YearBuilt >= 1861), PostCode VARCHAR(10) NOT NULL, IsActive BOOLEAN NOT NULL, AverageTicketSales INTEGER CHECK (Capacity >= AverageTicketSales >= 0));",
+        "CREATE TABLE Stadiums (sID INTEGER PRIMARY KEY NOT NULL, Capacity INTEGER NOT NULL CHECK (Capacity >= 0), StadiumName VARCHAR(50) NOT NULL, YearBuilt INTEGER NOT NULL CHECK (YearBuilt >= 1861), PostCode VARCHAR(10) NOT NULL, IsActive BOOLEAN NOT NULL, AverageTicketSales INT);",
 
-        "CREATE TABLE ShirtSponsors (ssID INTEGER PRIMARY KEY NOT NULL, ShirtSponsorName VARCHAR(50), ComNationISO3166-1alpha-2 VARCHAR(2), Owner VARCHAR(50), Website VARCHAR(50));",
+        "CREATE TABLE ShirtSponsors (ssID INTEGER PRIMARY KEY NOT NULL, ShirtSponsorName VARCHAR(50), ComNationISO31661Alpha2 VARCHAR(2), Owner VARCHAR(50), Website VARCHAR(50));",
 
         "CREATE TABLE Teams (tID INTEGER PRIMARY KEY NOT NULL, TeamName VARCHAR(30), sID INTEGER, ssID INTEGER, YearFounded INTEGER NOT NULL CHECK (YearFounded >= 1857), Website VARCHAR(60), FOREIGN KEY (sID) REFERENCES Stadiums(sID), FOREIGN KEY (ssID) REFERENCES ShirtSponsors(ssID));",
 
@@ -74,10 +74,10 @@ public class Code {
             System.exit(0); //close program, if server isnt connected then nothing else is going to work
         }
 
-        String[] csvArray = {"/main/resources/38639416.csv", "/main/resources/38790475.csv"};
+        String[] csvArray = {"38639416.csv", "38790475.csv"};
         for (String filenumber: csvArray) { //loop over the csv file names array
 
-            CsvReader reader = new CsvReader("src/resources" + filenumber); //make new csv reader with current csv file
+            CsvReader reader = new CsvReader(filenumber); //make new csv reader with current csv file
             String[] schema = {}; //will hold the sql statments to make current group members schema
             String[][] statements = code.getSQLStatments();
 
@@ -236,6 +236,7 @@ public class Code {
     {
         String sql = "";
         PreparedStatement statement = con.prepareStatement(" ");
+        
         switch (tableName) {
             case "Stadiums":
                 sql = "INSERT INTO  " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
