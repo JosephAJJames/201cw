@@ -9,6 +9,8 @@ Stadiums, 0, 'Anfield', 55000, 10, 0
 Stadiums, 1, 'Old Trafford', 65000, 10, 1
 Teams, 0, 0, 'Liverpool', NULL, 1892, 0, 1, 'FSG'
 Teams, 1, 1, 'Man United', 'North West', 1878, 0, 3, 'Glazer Family'
-Fixtures, 1, 2024-03-31 16:30:00, Overcast, 1, 1, NULL, 0
-Fixtures, 2, 2024-03-31 16:30:00, Overcast, 3, 1, 1, 1
-TeamMatchups, 1, 0, 1, 1
+TeamMatchups, 1, 0, 1
+Fixtures, 1, 1, 2024-03-31 16:30:00, Overcast, 1, 1, 0, 0
+Fixtures, 2, 1, 2024-03-31 16:30:00, Overcast, 3, 1, 1, 1
+Players, 0, 0, NULL, NULL, NULL, NULL
+Players, 1, 1, NULL, NULL, NULL, NULL

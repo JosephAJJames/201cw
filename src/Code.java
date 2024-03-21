@@ -13,13 +13,13 @@ public class Code {
             
             "CREATE TABLE Stadiums(sID INT PRIMARY KEY NOT NULL, Name VARCHAR(25), Capacity INT NOT NULL, NoOfStands INT NOT NULL, tID INT UNIQUE)", //child of the Teams table, tid can be null as a stadium might not be in use
 
-            "CREATE TABLE Teams(tID INT PRIMARY KEY NOT NULL, sID INT, TeamName VARCHAR(25), Region VARCHAR(25), YearFounded INT, PlaysInUCL BOOLEAN, cID INT UNIQUE, Owner VARCHAR(30), FOREIGN KEY (sID) REFERENCES Stadiums(sID) ON DELETE RESTRICT ,FOREIGN KEY (cID) REFERENCES Coaches(cID) ON DELETE RESTRICT)", //child table of coaches, can't delete a team if its in use in players
+            "CREATE TABLE Teams(tID INT PRIMARY KEY NOT NULL, sID INT NOT NULL, TeamName VARCHAR(25), Region VARCHAR(25), YearFounded INT, PlaysInUCL BOOLEAN, cID INT NOT NULL UNIQUE, Owner VARCHAR(30), FOREIGN KEY (sID) REFERENCES Stadiums(sID) ON DELETE RESTRICT ,FOREIGN KEY (cID) REFERENCES Coaches(cID) ON DELETE RESTRICT)", //child table of coaches, can't delete a team if its in use in players
 
             "CREATE TABLE Referees(rID INT PRIMARY KEY NOT NULL, FirstName VARCHAR(25), LastName VARCHAR(25), yCardsThisYear INT, rCardsThisYear INT)", //parent table
-            
-            "CREATE TABLE Fixtures(fID INT PRIMARY KEY NOT NULL, KickOff DATETIME, WeatherConditions VARCHAR (25), HomeScore INT, AwayScore INT, rID INT, sID INT, FOREIGN KEY (rID) REFERENCES Referees(rID) ON DELETE RESTRICT);", //parent table   //referee would be NOT NULL however, referees for future games have not yet been decided
 
-            "CREATE TABLE TeamMatchups(tmID INT PRIMARY KEY NOT NULL, HomeTeam INT NOT NULL, AwayTeam INT NOT NULL, fID INT, FOREIGN KEY (HomeTeam) REFERENCES Teams(tID) ON DELETE RESTRICT, FOREIGN KEY (AwayTeam) REFERENCES Teams(tID) ON DELETE RESTRICT, FOREIGN KEY (fID) REFERENCES Fixtures(fID) ON DELETE RESTRICT);", //child table of teams
+            "CREATE TABLE TeamMatchups(tmID INT PRIMARY KEY NOT NULL, Team1 INT NOT NULL, Team2 INT NOT NULL, FOREIGN KEY (Team1) REFERENCES Teams(tID) ON DELETE RESTRICT, FOREIGN KEY (Team2) REFERENCES Teams(tID) ON DELETE RESTRICT);", //child table of teams
+            
+            "CREATE TABLE Fixtures(fID INT PRIMARY KEY NOT NULL, tmID INT NOT NULL , KickOff DATETIME, WeatherConditions VARCHAR (25), Team1Score INT, Team2Score INT, rID INT NOT NULL, sID INT NOT NULL, FOREIGN KEY (rID) REFERENCES Referees(rID) ON DELETE RESTRICT, FOREIGN KEY (tmID) REFERENCES TeamMatchups (tmID) ON DELETE RESTRICT, FOREIGN KEY (sID) REFERENCES Stadiums(sID) ON DELETE RESTRICT);", //parent table   //referee would be NOT NULL however, referees for future games have not yet been decided
 
             "CREATE TABLE Players(pID INT PRIMARY KEY NOT NULL, tID INT, Position VARCHAR(5), DOB DATE, HeightCM INT, ShirtNum INT, FOREIGN KEY (tID) REFERENCES Teams(tID) ON DELETE RESTRICT);", //Parent table, can't delete a team thats being used
 
@@ -33,7 +33,7 @@ public class Code {
     String[] joesDELETEQuerys = {"DELETE FROM Teams WHERE Teams.tID = 1;",
                                 "DELETE FROM Stadiums WHERE Stadiums.sID = 1;"};
 
-    String[] dannysSELECTQuerys = {"SELECT * FROM Teams"};
+    String[] dannysSELECTQuerys = {"SELECT TeamName FROM Teams WHERE tID = 1"};
 
 
     String[] dannysSqlStatments = {
@@ -44,15 +44,15 @@ public class Code {
 
         "CREATE TABLE ShirtSponsors (ssID INTEGER PRIMARY KEY NOT NULL, ShirtSponsorName VARCHAR(50), NationOfCompany VARCHAR(25), Owner VARCHAR(50), Website VARCHAR(50));",
 
-        "CREATE TABLE Teams (tID INTEGER PRIMARY KEY NOT NULL, TeamName VARCHAR(30), sID INTEGER, ssID INTEGER, YearFounded INTEGER NOT NULL CHECK (YearFounded >= 1857), Website VARCHAR(60), FOREIGN KEY (sID) REFERENCES Stadiums(sID), FOREIGN KEY (ssID) REFERENCES ShirtSponsors(ssID));",
+        "CREATE TABLE Teams (tID INTEGER PRIMARY KEY NOT NULL, TeamName VARCHAR(30), sID INTEGER NOT NULL, ssID INTEGER, YearFounded INTEGER NOT NULL CHECK (YearFounded >= 1857), Website VARCHAR(60), FOREIGN KEY (sID) REFERENCES Stadiums(sID) ON DELETE RESTRICT, FOREIGN KEY (ssID) REFERENCES ShirtSponsors(ssID) ON DELETE RESTRICT);",
 
-        "CREATE TABLE Players(pID INT PRIMARY KEY NOT NULL, FirstName VARCHAR(20), LastName VARCHAR(20), tID INT, StrongFoot VARCHAR(1), DOB DATE, WeightKG INT, ShirtNum INT, FOREIGN KEY (tID) REFERENCES Teams(tID));",
+        "CREATE TABLE Players(pID INT PRIMARY KEY NOT NULL, FirstName VARCHAR(20), LastName VARCHAR(20), tID INT, StrongFoot VARCHAR(2), DOB DATE, WeightKG INT, ShirtNum INT, FOREIGN KEY (tID) REFERENCES Teams(tID) ON DELETE RESTRICT);",
 
-        "CREATE TABLE Contracts (cID INTEGER PRIMARY KEY, pID INTEGER UNIQUE, ContractType VARCHAR(20), WeeklySalaryUSD DECIMAL, DateSigned DATE, ExpiryDate DATE, Active BOOLEAN, FOREIGN KEY (pID) REFERENCES Players(pID));",
+        "CREATE TABLE Contracts (cID INTEGER PRIMARY KEY, pID INTEGER NOT NULL, tID INTEGER NOT NULL, ContractType VARCHAR(20), WeeklySalaryUSD DECIMAL, DateSigned DATE, ExpiryDate DATE, Active BOOLEAN, FOREIGN KEY (pID) REFERENCES Players(pID) ON DELETE RESTRICT);",
 
-        "CREATE TABLE Injuries (iID INTEGER PRIMARY KEY, pID INTEGER NOT NULL, DateOfInjury DATE NOT NULL, DateOfRecovery DATE, TypeOfInjury VARCHAR(50), FOREIGN KEY (pID) REFERENCES Players(pID));",
+        "CREATE TABLE Injuries (iID INTEGER PRIMARY KEY, pID INTEGER NOT NULL, DateOfInjury DATE NOT NULL, DateOfRecovery DATE, TypeOfInjury VARCHAR(50), FOREIGN KEY (pID) REFERENCES Players(pID) ON DELETE RESTRICT);",
 
-        "CREATE TABLE TeamMerchandise (mID INTEGER PRIMARY KEY, tID INTEGER, ProductName VARCHAR(30), PriceUSD DECIMAL, UnitsSold INTEGER, InStock BOOLEAN, DateOfNextShipment DATE, FOREIGN KEY (tID) REFERENCES Teams(tID));"
+        "CREATE TABLE TeamMerchandise (mID INTEGER PRIMARY KEY, tID INTEGER, ProductName VARCHAR(30), PriceUSD DECIMAL, UnitsSold INTEGER, InStock BOOLEAN, DateOfNextShipment DATE, FOREIGN KEY (tID) REFERENCES Teams(tID) ON DELETE RESTRICT);"
     };
 
     
@@ -86,13 +86,13 @@ public class Code {
                     System.out.println("Scott you need to put all your shite in here please get coding soon");
             }
 
-            code.constructSchema(schema, con);
+            code.constructSchema(schema, con, filenumber);
 
             code.constructINSERTQuerys(reader, con, filenumber);
 
             code.performSELECTS(con, filenumber);
 
-            code.performDeletions(con, filenumber);
+            //code.performDeletions(con, filenumber);
         }
     }
 
@@ -160,9 +160,9 @@ public class Code {
         return (array[array.length - 1].equals(element));
     }
 
-    public void constructSchema(String[] schema, Connection con) //Builds the current DB schema
+    public void constructSchema(String[] schema, Connection con, String filename) //Builds the current DB schema
     {
-        System.out.println("Making Schema....."); 
+        System.out.println("Making Schema of student:" + filename + "....."); 
         try {
             Statement statment = con.createStatement();
 
@@ -172,13 +172,11 @@ public class Code {
 
                 statment.executeUpdate(SQLQuery);
 
-                System.out.println(SQLQuery + " this statement has been executed");
-
             }
         } catch (Exception e) {
                 e.printStackTrace();
         }
-        System.out.println("Schema has been constructed");   
+        System.out.println("Schema of student: " + filename +  " has been constructed");   
     }
 
     public void constructINSERTQuerys(CsvReader reader, Connection con, String filename) //reads from the csv and creates INSERT INTO Querys
@@ -196,6 +194,7 @@ public class Code {
                     if (x == 0) {   //first element of a record will always be table name
                         tableName = valueInRecord; 
                         System.out.println(tableName);
+                        
                     }
                     valuesToInsert.add(valueInRecord);
                 
@@ -265,15 +264,6 @@ public class Code {
         return prepState;
     }
 
-    /*
-    public static Boolean isEmptyQuery(PreparedStatement statement, Connection con) {
-        try {
-
-        } catch (Exception e) {
-            return true;
-        }
-    }
-    */
 
     public void makeDannysINSERTS(String tableName, ArrayList<String> valuesToInsert, Connection con) throws SQLException
     {
@@ -298,12 +288,12 @@ public class Code {
             
             case "Players":
                 types = new String[] {"Int", "String", "String", "Int", "String", "Date", "Int", "Int"};
-                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
                 break;
             
             case "Contracts":
-                types = new String[] {"Int", "Int", "String", "Decimal", "Date", "Date", "Bool"};
-                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
+                types = new String[] {"Int", "Int", "Int", "String", "Decimal", "Date", "Date", "Bool"};
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
                 break;
 
             case "Injuries":
@@ -320,7 +310,6 @@ public class Code {
         statement = statetmentBuilder(statement, valuesToInsert, types);
 
         Integer rowsAffected = statement.executeUpdate();
-        System.out.println("Number of rows affected: " + rowsAffected.toString());
 
     }
 
@@ -344,10 +333,9 @@ public class Code {
                 sql = "INSERT INTO " + tableName + " VALUES(? ,?, ?, ?, ?, ?, ?, ?)";            
                 break;
             case "Fixtures":
-                System.out.println("record: "+ valuesToInsert);
-                System.out.println();
-                types = new String[] {"Int", "Date", "String", "Int", "Int", "Int", "Int"};
-                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
+                //System.out.println("record: "+ valuesToInsert);
+                types = new String[] {"Int", "Int", "Date", "String", "Int", "Int", "Int", "Int"};
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
                 break;
             case "Players":
                 types = new String[] {"Int", "Int", "String", "Date", "Int", "Int"};
@@ -358,14 +346,13 @@ public class Code {
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
                 break;
             case "TeamMatchups":
-                types = new String[] {"Int", "Int", "Int", "Int"};
-                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?)";
+                types = new String[] {"Int", "Int", "Int"};
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?)";
                 break; 
         }
         statement = con.prepareStatement(sql);
         statement = statetmentBuilder(statement, valuesToInsert, types);
         Integer rowsAffected = statement.executeUpdate();
-        System.out.println("Number of rows affeced: " + rowsAffected.toString());
     
     }
 
