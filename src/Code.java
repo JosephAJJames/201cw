@@ -17,7 +17,7 @@ public class Code {
 
             "CREATE TABLE Referees(rID INT PRIMARY KEY NOT NULL, FirstName VARCHAR(25), LastName VARCHAR(25), yCardsThisYear INT, rCardsThisYear INT)", //parent table
             
-            "CREATE TABLE Fixtures(fID INT PRIMARY KEY NOT NULL, KickOff DATETIME, WeatherConditions VARCHAR (25), HomeScore INT, AwayScore INT, rID INT, FOREIGN KEY (rID) REFERENCES Referees(rID) ON DELETE RESTRICT);", //parent table   //referee would be NOT NULL however, referees for future games have not yet been decided
+            "CREATE TABLE Fixtures(fID INT PRIMARY KEY NOT NULL, KickOff DATETIME, WeatherConditions VARCHAR (25), HomeScore INT, AwayScore INT, rID INT, sID INT, FOREIGN KEY (rID) REFERENCES Referees(rID) ON DELETE RESTRICT);", //parent table   //referee would be NOT NULL however, referees for future games have not yet been decided
 
             "CREATE TABLE TeamMatchups(tmID INT PRIMARY KEY NOT NULL, HomeTeam INT NOT NULL, AwayTeam INT NOT NULL, fID INT, FOREIGN KEY (HomeTeam) REFERENCES Teams(tID) ON DELETE RESTRICT, FOREIGN KEY (AwayTeam) REFERENCES Teams(tID) ON DELETE RESTRICT, FOREIGN KEY (fID) REFERENCES Fixtures(fID) ON DELETE RESTRICT);", //child table of teams
 
@@ -35,7 +35,6 @@ public class Code {
 
     String[] dannysSELECTQuerys = {"SELECT * FROM Teams"};
 
-    String[] scottsSELECTQuerys = {""};
 
     String[] dannysSqlStatments = {
 
@@ -43,11 +42,11 @@ public class Code {
 
         "CREATE TABLE Stadiums (sID INTEGER PRIMARY KEY NOT NULL, Capacity INTEGER NOT NULL CHECK (Capacity >= 0), StadiumName VARCHAR(50) NOT NULL, YearBuilt INTEGER NOT NULL CHECK (YearBuilt >= 1861), PostCode VARCHAR(10) NOT NULL, IsActive BOOLEAN NOT NULL, AverageTicketSales INT);",
 
-        "CREATE TABLE ShirtSponsors (ssID INTEGER PRIMARY KEY NOT NULL, ShirtSponsorName VARCHAR(50), ComNationISO31661Alpha2 VARCHAR(2), Owner VARCHAR(50), Website VARCHAR(50));",
+        "CREATE TABLE ShirtSponsors (ssID INTEGER PRIMARY KEY NOT NULL, ShirtSponsorName VARCHAR(50), NationOfCompany VARCHAR(25), Owner VARCHAR(50), Website VARCHAR(50));",
 
         "CREATE TABLE Teams (tID INTEGER PRIMARY KEY NOT NULL, TeamName VARCHAR(30), sID INTEGER, ssID INTEGER, YearFounded INTEGER NOT NULL CHECK (YearFounded >= 1857), Website VARCHAR(60), FOREIGN KEY (sID) REFERENCES Stadiums(sID), FOREIGN KEY (ssID) REFERENCES ShirtSponsors(ssID));",
 
-        "CREATE TABLE Players(pID INT PRIMARY KEY NOT NULL, tID INT, StrongFoot VARCHAR(1), DOB DATE, WeightKG INT, ShirtNum INT, FOREIGN KEY (tID) REFERENCES Teams(tID));",
+        "CREATE TABLE Players(pID INT PRIMARY KEY NOT NULL, FirstName VARCHAR(20), LastName VARCHAR(20), tID INT, StrongFoot VARCHAR(1), DOB DATE, WeightKG INT, ShirtNum INT, FOREIGN KEY (tID) REFERENCES Teams(tID));",
 
         "CREATE TABLE Contracts (cID INTEGER PRIMARY KEY, pID INTEGER UNIQUE, ContractType VARCHAR(20), WeeklySalaryUSD DECIMAL, DateSigned DATE, ExpiryDate DATE, Active BOOLEAN, FOREIGN KEY (pID) REFERENCES Players(pID));",
 
@@ -58,12 +57,7 @@ public class Code {
 
     
 
-
-
-
-    String[] scottsSQLStatments = {};
-
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException { // java -cp ".:/usr/share/java/mariadb-java-client.jar:" Code.java
 
         Code code = new Code();
         String url = "jdbc:mysql://localhost:3306/";
@@ -105,13 +99,15 @@ public class Code {
     public void performDeletions(Connection con, String filename)
     {
         String[] queries = this.getDELETEQuerys(filename);
-        for (String query : queries) {
-            try {
-                Statement statment = con.createStatement();
-                Integer rows = statment.executeUpdate(query);
-                System.out.println("Rows Deleted: " + rows.toString());
-            } catch (Exception e) {
-                System.out.println("An error occured: " + e.getMessage());
+        if (!(queries == null)) {
+            for (String query : queries) {
+                try {
+                    Statement statment = con.createStatement();
+                    Integer rows = statment.executeUpdate(query);
+                    System.out.println("Rows Deleted: " + rows.toString());
+                } catch (Exception e) {
+                    System.out.println("An error occured: " + e.getMessage());
+                }
             }
         }
     }
@@ -130,8 +126,7 @@ public class Code {
 
         return new String[][]{
                 this.joesSQLStatments,
-                this.dannysSqlStatments,
-                this.scottsSQLStatments
+                this.dannysSqlStatments
         };
     }
 
@@ -142,7 +137,7 @@ public class Code {
         } else if (filename.equals(new String("38790475.csv"))) {
             return this.dannysSELECTQuerys;
         } else {
-            return this.scottsSELECTQuerys;
+            return null; //your code goes here scotty boy
         }
     }
 
@@ -202,7 +197,6 @@ public class Code {
                         tableName = valueInRecord; 
                         System.out.println(tableName);
                     }
-
                     valuesToInsert.add(valueInRecord);
                 
                     x++;
@@ -225,88 +219,154 @@ public class Code {
         } finally {}
     }
 
-    public static PreparedStatement statetmentBuilder(PreparedStatement prepState, ArrayList<String> valuesToInsert)throws SQLException{ 
+    public static PreparedStatement statetmentBuilder(PreparedStatement prepState, ArrayList<String> valuesToInsert, String[] types)throws SQLException{ 
+
         for (int x = 1; x < valuesToInsert.size(); x++) {
-            prepState.setString(x, valuesToInsert.get(x));
+            Boolean defaultCaught = false;
+            String temp = valuesToInsert.get(x).strip();
+            if (temp.equals("NULL")){
+                int typeOf = 0;
+                //deal with null
+                switch (types[x - 1]) {
+                    case "Int":
+                        typeOf = java.sql.Types.INTEGER;
+                        break;
+
+                    case "Bool":
+                        typeOf = java.sql.Types.TINYINT;
+                        break;
+                    
+                    case "Decimal":
+                        typeOf = java.sql.Types.DECIMAL;
+                        break;
+
+                    case "Date":
+                        typeOf = java.sql.Types.DATE;
+                        break;
+                    
+                    case "DateTime":
+                        typeOf = java.sql.Types.TIMESTAMP;
+                    
+                    default:
+                        defaultCaught = true;
+                        prepState.setString(x, temp);
+                        break;
+                }
+                if (!defaultCaught){
+                    System.out.println("Inserting: " + temp + " at position: " + x);
+                    prepState.setNull(x, typeOf);
+                }
+            }
+            else{
+                System.out.println("Inserting: " + temp + " at position: " + x);
+                prepState.setString(x, valuesToInsert.get(x));
+            }
         }
         return prepState;
     }
+
+    /*
+    public static Boolean isEmptyQuery(PreparedStatement statement, Connection con) {
+        try {
+
+        } catch (Exception e) {
+            return true;
+        }
+    }
+    */
 
     public void makeDannysINSERTS(String tableName, ArrayList<String> valuesToInsert, Connection con) throws SQLException
     {
         String sql = "";
         PreparedStatement statement = con.prepareStatement(" ");
-        
+        String[] types = {};
         switch (tableName) {
             case "Stadiums":
+                types = new String[] {"Int", "Int", "String", "Int", "String", "Bool", "Int"};
                 sql = "INSERT INTO  " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
                 break;
         
             case "ShirtSponsors":
+                types = new String[] {"Int", "String", "String", "String", "String"};
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
                 break;
 
             case "Teams":
-                sql = "INSERT INTO " + tableName + " VALUES(? ,?, ?, ?, ?, ?, ?, ?)";
+                types = new String[] {"Int", "String", "Int", "Int", "Int", "String"};
+                sql = "INSERT INTO " + tableName + " VALUES(? ,?, ?, ?, ?, ?)";
                 break;
             
             case "Players":
-                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
+                types = new String[] {"Int", "String", "String", "Int", "String", "Date", "Int", "Int"};
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 break;
             
             case "Contracts":
+                types = new String[] {"Int", "Int", "String", "Decimal", "Date", "Date", "Bool"};
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
                 break;
 
             case "Injuries":
+                types = new String[] {"Int", "Int", "Date", "Date", "String"};
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
                 break;
 
             case "TeamMerchandise":
+                types = new String[] {"Int", "Int", "String", "Decimal", "Int", "Bool", "Date"};
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
                 break;
         }
         statement = con.prepareStatement(sql);
-        statetmentBuilder(statement, valuesToInsert);
+        statement = statetmentBuilder(statement, valuesToInsert, types);
+
         Integer rowsAffected = statement.executeUpdate();
         System.out.println("Number of rows affected: " + rowsAffected.toString());
 
     }
 
+
     public void makeJoesINSERTS(String tableName, ArrayList<String> valuesToInsert, Connection con) throws SQLException
     {
         String sql = "";
         PreparedStatement statement = con.prepareStatement(" ");
+        String[] types = {};
         switch (tableName) {
             case "Coaches":
+                types = new String[] {"Int", "String", "String", "Int", "Bool"};
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
                 break;
             case "Referees":
+                types = new String[] {"Int", "String", "String", "Int", "Int"};
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
                 break;
             case "Teams":
+                types = new String[] {"Int", "Int", "String", "String", "Int", "Bool", "Int", "String"};
                 sql = "INSERT INTO " + tableName + " VALUES(? ,?, ?, ?, ?, ?, ?, ?)";            
                 break;
             case "Fixtures":
+                System.out.println("record: "+ valuesToInsert);
+                System.out.println();
+                types = new String[] {"Int", "Date", "String", "Int", "Int", "Int", "Int"};
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
                 break;
             case "Players":
-            for (int x = 0; x < valuesToInsert.size(); x++) {
-                System.out.println("value: " + valuesToInsert.get(x));
-            }
+                types = new String[] {"Int", "Int", "String", "Date", "Int", "Int"};
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?)";
                 break;
             case "Stadiums":
+                types = new String[] {"Int", "String", "Int", "Int", "Int"};
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?)";
                 break;
             case "TeamMatchups":
-                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?)";
+                types = new String[] {"Int", "Int", "Int", "Int"};
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?)";
                 break; 
         }
         statement = con.prepareStatement(sql);
-        statetmentBuilder(statement, valuesToInsert);
+        statement = statetmentBuilder(statement, valuesToInsert, types);
         Integer rowsAffected = statement.executeUpdate();
         System.out.println("Number of rows affeced: " + rowsAffected.toString());
+    
     }
 
 
