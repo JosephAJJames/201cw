@@ -5,7 +5,12 @@ import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.List;
 
-class Code {
+/*
+ * @author Joseph James
+ * @author Daniel Jeffery
+ */
+
+public class code {
 
     String[] joesSQLStatments = {"DROP DATABASE IF EXISTS PremGames" ,"CREATE DATABASE PremGames;", "USE PremGames;", 
 
@@ -27,14 +32,26 @@ class Code {
 
 
     String[] joesSELECTQuerys = {
-                                "SELECT Teams.Region, SUM(Stadiums.Capacity) AS TotalCapacity FROM Teams JOIN Stadiums ON Teams.sID = Stadiums.sID GROUP BY (Teams.Region) HAVING SUM(Stadiums.Capacity) > 0;"
+                                "SELECT Teams.Region, SUM(Stadiums.Capacity) AS TotalCapacity FROM Teams JOIN Stadiums ON Teams.sID = Stadiums.sID GROUP BY (Teams.Region) HAVING SUM(Stadiums.Capacity) > 20000;"
+                                , "SELECT Teams.TeamName, Coaches.FirstName, Coaches.LastName, COUNT(*) as NumberOfTrophies FROM Teams JOIN Coaches ON Teams.cID = Coaches.cID GROUP BY Teams.TeamName, Coaches.FirstName, Coaches.LastName HAVING NumberOfTrophies > 5;"
+                                , "SELECT * FROM Teams;"
+                                , "SELECT Teams.TeamName, Stadiums.Name FROM Teams JOIN Stadiums ON Teams.sID = Stadiums.sID;"
     };
 
     String[] joesDELETEQuerys = {"DELETE FROM Teams WHERE Teams.tID = 1;",
                                 "DELETE FROM Stadiums WHERE Stadiums.sID = 1;"};
 
-    String[] dannysSELECTQuerys = {"SELECT TeamName FROM Teams WHERE tID = 1"};
+    String[] dannysSELECTQuerys = {
+        "SELECT Teams.TeamName, COUNT(*) AS NumberOfInjuries FROM Teams JOIN Players ON Teams.tID = Players.tID JOIN Injuries ON Players.pID = Injuries.pID GROUP BY Teams.TeamName HAVING COUNT(*) > 5;" 
+        ,"SELECT Teams.TeamName, COUNT(*) AS NumberOfPlayers FROM Teams INNER JOIN Players ON Teams.tID = Players.tID GROUP BY Teams.TeamName HAVING COUNT(*) > 20;"
+        ,"SELECT * FROM Injuries"
+        ,"SELECT Players.LastName, Contracts.ExpiryDate FROM Players JOIN Contracts ON Players.pID = Contracts.pID"
+    };
 
+    String[] dannysDELETEQuerys = {
+        "DELETE FROM Players WHERE pID = 1;"
+        ,"DELETE FROM Teams WHERE tID =1;"
+    };
 
     String[] dannysSqlStatments = {
 
@@ -67,15 +84,15 @@ class Code {
     };
 
     String[] scottsDELETEQuerys = {"DELETE FROM Clubs WHERE club_id = 1;",
-                                "DELETE FROM Stadiums WHERE stadium_id = 1;"};
+    "DELETE FROM Stadiums WHERE stadium_id = 1;"};
 
     String[] scottsSELECTQuerys = {"SELECT club_id, COUNT(*) AS num_players FROM Players GROUP BY club_id HAVING COUNT(*) > 20;",
-                                "SELECT stadium_id, stadium_name, stadium_capacity FROM Stadiums GROUP BY stadium_id, stadium_name, stadium_capacity HAVING stadium_capacity > 10000;"};
+    "SELECT stadium_id, stadium_name, stadium_capacity FROM Stadiums GROUP BY stadium_id, stadium_name, stadium_capacity HAVING stadium_capacity > 10000;"};
 
     
     public static void main(String[] args) throws SQLException { // java -cp ".:/usr/share/java/mariadb-java-client.jar:" Code.java
 
-        Code code = new Code();
+        code code = new code();
         String url = "jdbc:mysql://localhost:3306/";
         Connection con = connect(url);
 
@@ -109,7 +126,7 @@ class Code {
 
             code.performSELECTS(con, filenumber);
 
-            //code.performDeletions(con, filenumber);
+            code.performDeletions(con, filenumber);
         }
     }
 
@@ -121,9 +138,9 @@ class Code {
                 try {
                     Statement statment = con.createStatement();
                     Integer rows = statment.executeUpdate(query);
-                    System.out.println("Rows Deleted: " + rows.toString());
+                    System.out.println("Rows Deleted: " + rows.toString() + "\n\n");
                 } catch (Exception e) {
-                    System.out.println("An error occured: " + e.getMessage());
+                    System.out.println("An error occured: " + e.getMessage()  + "\n\n");
                 }
             }
         }
@@ -133,10 +150,11 @@ class Code {
     {
         if (filename.equals(new String("38639416.csv"))) {
             return this.joesDELETEQuerys;
+        } else if (filename.equals(new String("38790475.csv"))) {
+            return this.dannysDELETEQuerys;
+        } else if (filename.equals(new String("38783681.csv"))) {
+            return this.scottsDELETEQuerys;
         } else {
-            if (filename.equals(new String("38783681.csv"))){
-                return this.scottsDELETEQuerys;
-            }
             return null;
         }
     }
@@ -157,8 +175,10 @@ class Code {
             return this.joesSELECTQuerys;
         } else if (filename.equals(new String("38790475.csv"))) {
             return this.dannysSELECTQuerys;
-        } else {
+        } else if (filename.equals(new String("38783681.csv"))) {
             return this.scottsSELECTQuerys;
+        } else {
+            return null;
         }
     }
 
@@ -183,7 +203,7 @@ class Code {
 
     public void constructSchema(String[] schema, Connection con, String filename) //Builds the current DB schema
     {
-        System.out.println("Making Schema of student:" + filename + "....."); 
+        System.out.println("Making Schema of student:" + filename + ".....\n\n\n\n\n"); 
         try {
             Statement statment = con.createStatement();
 
@@ -197,7 +217,7 @@ class Code {
         } catch (Exception e) {
                 e.printStackTrace();
         }
-        System.out.println("Schema of student: " + filename +  " has been constructed");   
+        System.out.println("Schema of student: " + filename +  " has been constructed\n\n\n\n");   
     }
 
     public void constructINSERTQuerys(CsvReader reader, Connection con, String filename) //reads from the csv and creates INSERT INTO Querys
@@ -214,7 +234,6 @@ class Code {
                 for (String valueInRecord : record) {
                     if (x == 0) {   //first element of a record will always be table name
                         tableName = valueInRecord; 
-                        System.out.println(tableName);
                         
                     }
                     valuesToInsert.add(valueInRecord);
@@ -230,7 +249,6 @@ class Code {
                     case "38790475.csv":
                         this.makeDannysINSERTS(tableName, valuesToInsert, con);
                         break;
-                    
                     case "38783681.csv":
                         this.makeScottsINSERTS(tableName, valuesToInsert, con);
                         break;
@@ -277,12 +295,10 @@ class Code {
                         break;
                 }
                 if (!defaultCaught){
-                    System.out.println("Inserting: " + temp + " at position: " + x);
                     prepState.setNull(x, typeOf);
                 }
             }
             else{
-                System.out.println("Inserting: " + temp + " at position: " + x);
                 prepState.setString(x, valuesToInsert.get(x));
             }
         }
@@ -410,14 +426,61 @@ class Code {
     
     }
 
-
     public void performSELECTS(Connection con, String filename) throws SQLException
     {
         String[] querys = this.getSELECTQueries(filename);
-        Statement currentStatment = con.createStatement();
-        for (String currentQuery: querys) {
-            ResultSet rSet = currentStatment.executeQuery(currentQuery);
-            printResultSet(rSet);
+        if (filename.equals("38639416.csv")) {
+            int x = 0;
+            for (String currentQuery : querys) {
+                String sql = "";
+                if (x == 0) {
+                    System.out.println("Region by sum of clubs stadiums capacity in that region, but only region with more that 20,0000:");
+                }
+                if (x == 1) {
+                    System.out.println("Teams by number of trophies and their coaches, but only teams that have won more that 2 trophies:");
+                }
+                if (x == 2) {
+                    System.out.println("All columns from the teams table:");
+                }
+                if(x == 3) {
+                    System.out.println("The Stadium and the name of the team that plays there:");
+                }
+                sql = currentQuery;
+                Statement currStatement = con.createStatement();
+                ResultSet rSet = currStatement.executeQuery(sql);
+                printResultSet(rSet);
+                x++;
+            }
+
+        } else if (filename.equals("38790475.csv")) {
+            int x = 0;
+            for (String currentQuery : querys) {
+                String sql = "";
+                if (x == 0) {
+                    System.out.println("Injuries by Teams, but only Teams with more than 15 injuries:");
+                }
+                if (x == 1) {
+                    System.out.println("Number of Players by Teams, but only teams with more that 20 players:");
+                }
+                if (x == 2) { 
+                    System.out.println("All record from Injuries:");
+                }
+                if (x == 3) { 
+                    System.out.println("All contracts with the players last name:");
+                }
+                sql = currentQuery;
+                Statement statement = con.createStatement();
+                ResultSet rSet = statement.executeQuery(sql);
+                printResultSet(rSet);
+                x++;
+            }
+        } else {
+            for (String currentQuery: querys) {
+                System.out.println(currentQuery);
+                Statement statement = con.createStatement();
+                ResultSet rSet = statement.executeQuery(currentQuery);
+                printResultSet(rSet);
+            }
         }
     }
 
@@ -445,11 +508,10 @@ class Code {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        System.out.println("\n");
     }
-
+    
 }
-
-
 
 
 class CsvReader {
