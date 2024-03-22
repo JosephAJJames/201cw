@@ -1,3 +1,10 @@
+
+
+
+java -cp ".:/usr/share/java/mariadb-java-client.jar:" <FILE NAME>.java
+
+
+
 java.sql.SQLTransientConnectionException: (conn=37) Incorrect integer value: ' NULL' for column 'AverageTicketSales' at row 1
         at org.mariadb.jdbc.internal.util.exceptions.ExceptionFactory.createException(ExceptionFactory.java:79)
         at org.mariadb.jdbc.internal.util.exceptions.ExceptionFactory.create(ExceptionFactory.java:158)
@@ -8,3 +15,35 @@ java.sql.SQLTransientConnectionException: (conn=37) Incorrect integer value: ' N
         at Code.makeDannysINSERTS(Code.java:271)
         at Code.constructINSERTQuerys(Code.java:217)
         at Code.main(Code.java:97)
+        
+        
+        
+        
+SELECT Teams.TeamName, Coaches.FirstName, Coaches.LastName, COUNT(*) as NumberOfTrophies
+FROM Teams
+INNER JOIN Coaches ON Teams.cID = Coaches.cID
+GROUP BY Teams.TeamName, Coaches.FirstName, Coaches.LastName
+HAVING NumberOfTrophies > 5;
+
+
+SELECT Teams.TeamName, COUNT(*) AS NumberOfPlayers
+FROM Teams
+INNER JOIN Players ON Teams.tID = Players.tID
+GROUP BY Teams.TeamName
+HAVING COUNT(*) > 20;
+
+
+
+
+SELECT Teams.TeamName, COUNT(*) AS NumberOfInjuries FROM Teams JOIN Players ON Teams.tID = Players.tID JOIN Injuries ON Players.pID = Injuries.pID GROUP BY Teams.TeamName HAVING COUNT(*) > 5;
+
+
+
+    String[] dannysSELECTQuerys = {
+        "SELECT Teams.TeamName, COUNT(*) AS NumberOfInjuries FROM Teams JOIN Players ON Teams.tID = Players.tID JOIN Injuries ON Players.pID = Injuries.pID GROUP BY Teams.TeamName HAVING COUNT(*) > 15;" 
+        ,"SELECT Teams.TeamName, COUNT(*) AS NumberOfPlayers FROM Teams INNER JOIN Players ON Teams.tID = Players.tID GROUP BY Teams.TeamName HAVING COUNT(*) > 20;"
+        ,"SELECT * FROM Injuries"
+        ,"SELECT Players.LastName, Contracts.ExpiryDate FROM Players.cID = Contracts.cID"
+    };
+    
+    
