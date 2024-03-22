@@ -55,7 +55,7 @@ public class Code {
         "CREATE TABLE TeamMerchandise (mID INTEGER PRIMARY KEY, tID INTEGER, ProductName VARCHAR(30), PriceUSD DECIMAL, UnitsSold INTEGER, InStock BOOLEAN, DateOfNextShipment DATE, FOREIGN KEY (tID) REFERENCES Teams(tID) ON DELETE RESTRICT);"
     };
 
-    String[] scottsSQLStatments = {"DROP DATABASE IF EXISTS PremGames" ,"CREATE DATABASE PremGames;", "USE PremGames;", 
+    String[] scottsSQLStatments = {"DROP DATABASE IF EXISTS footballStuff" ,"CREATE DATABASE footballStuff;", "USE footballStuff;", 
 
     "CREATE TABLE Players (player_id INT NOT NULL PRIMARY KEY, player_name VARCHAR(100), nationality VARCHAR(50), date_of_birth DATE, position VARCHAR(20), club_id INT NOT NULL, FOREIGN KEY (club_id) REFERENCES Clubs(club_id) ON DELETE RESTRICT);",
 
