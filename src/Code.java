@@ -55,8 +55,26 @@ public class Code {
         "CREATE TABLE TeamMerchandise (mID INTEGER PRIMARY KEY, tID INTEGER, ProductName VARCHAR(30), PriceUSD DECIMAL, UnitsSold INTEGER, InStock BOOLEAN, DateOfNextShipment DATE, FOREIGN KEY (tID) REFERENCES Teams(tID) ON DELETE RESTRICT);"
     };
 
-    
+    String[] scottsSQLStatments = {"DROP DATABASE IF EXISTS PremGames" ,"CREATE DATABASE PremGames;", "USE PremGames;", 
 
+    "CREATE TABLE Players (player_id INT NOT NULL PRIMARY KEY, player_name VARCHAR(100), nationality VARCHAR(50), date_of_birth DATE, position VARCHAR(20), club_id INT NOT NULL, FOREIGN KEY (club_id) REFERENCES Clubs(club_id) ON DELETE RESTRICT);",
+
+    "CREATE TABLE Clubs (club_id INT NOT NULL PRIMARY KEY, club_name VARCHAR(100) UNIQUE NOT NULL, country VARCHAR(50), founded_year INT);",
+
+    "CREATE TABLE Stadiums (stadium_id INT NOT NULL PRIMARY KEY, stadium_name VARCHAR(100) NOT NULL, club_id INT NOT NULL, stadium_capacity INT, FOREIGN KEY (club_id) REFERENCES Clubs(club_id) ON DELETE RESTRICT);",
+
+    "CREATE TABLE Matches (match_id INT NOT NULL PRIMARY KEY, match_date DATE, home_team_id INT NOT NULL, away_team_id INT NOT NULL, stadium_id INT NOT NULL, home_goals INT, away_goals INT, FOREIGN KEY (home_team_id) REFERENCES Clubs(club_id) ON DELETE RESTRICT, FOREIGN KEY (away_team_id) REFERENCES Clubs(club_id) ON DELETE RESTRICT, FOREIGN KEY (stadium_id) REFERENCES Stadiums(stadium_id) ON DELETE RESTRICT);"
+    };
+
+    String[] scottsDELETEQuerys = {"DELETE FROM Clubs WHERE club_id = 1;",
+                                "DELETE FROM Stadiums WHERE stadium_id = 1;"};
+
+    String[] scottsSELECTQuerys = {"SELECT match_id FROM Matches WHERE (home_goals > away_goals)"};
+
+    String[] scottsGroupByQuerys = {"SELECT club_id, COUNT(*) AS num_players FROM Players GROUP BY club_id HAVING COUNT(*) > 20;",
+                                "SELECT stadium_id, stadium_name, stadium_capacity FROM Stadiums GROUP BY stadium_id, stadium_name, stadium_capacity HAVING stadium_capacity > 10000;"};
+
+    
     public static void main(String[] args) throws SQLException { // java -cp ".:/usr/share/java/mariadb-java-client.jar:" Code.java
 
         Code code = new Code();
@@ -68,7 +86,7 @@ public class Code {
             System.exit(0); //close program, if server isnt connected then nothing else is going to work
         }
 
-        String[] csvArray = {"38639416.csv", "38790475.csv"};
+        String[] csvArray = {"38639416.csv", "38790475.csv", "38783681.csv"};
         for (String filenumber: csvArray) { //loop over the csv file names array
 
             CsvReader reader = new CsvReader(filenumber); //make new csv reader with current csv file
@@ -82,8 +100,9 @@ public class Code {
                 case "38790475.csv":
                     schema = statements[1]; //make the schema array Danny's SQL statments
                     break;
-                default:
-                    System.out.println("Scott you need to put all your shite in here please get coding soon");
+                case "38783681.csv":
+                    schema = statements[2]; //make the schema array Scott's SQL statments
+                    break;
             }
 
             code.constructSchema(schema, con, filenumber);
@@ -117,6 +136,9 @@ public class Code {
         if (filename.equals(new String("38639416.csv"))) {
             return this.joesDELETEQuerys;
         } else {
+            if (filename.equals(new String("38783681.csv"))){
+                return this.scottsDELETEQuerys;
+            }
             return null;
         }
     }
@@ -126,7 +148,8 @@ public class Code {
 
         return new String[][]{
                 this.joesSQLStatments,
-                this.dannysSqlStatments
+                this.dannysSqlStatments,
+                this.scottsSQLStatments
         };
     }
 
@@ -137,7 +160,7 @@ public class Code {
         } else if (filename.equals(new String("38790475.csv"))) {
             return this.dannysSELECTQuerys;
         } else {
-            return null; //your code goes here scotty boy
+            return this.scottsSELECTQuerys;
         }
     }
 
@@ -208,6 +231,10 @@ public class Code {
                     
                     case "38790475.csv":
                         this.makeDannysINSERTS(tableName, valuesToInsert, con);
+                        break;
+                    
+                    case "38783681.csv":
+                        this.makeScottsINSERTS(tableName, valuesToInsert, con);
                         break;
                 }
             }
@@ -349,6 +376,35 @@ public class Code {
                 types = new String[] {"Int", "Int", "Int"};
                 sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?)";
                 break; 
+        }
+        statement = con.prepareStatement(sql);
+        statement = statetmentBuilder(statement, valuesToInsert, types);
+        Integer rowsAffected = statement.executeUpdate();
+    
+    }
+
+    public void makeScottsINSERTS(String tableName, ArrayList<String> valuesToInsert, Connection con) throws SQLException
+    {
+        String sql = "";
+        PreparedStatement statement = con.prepareStatement(" ");
+        String[] types = {};
+        switch (tableName) {
+            case "Players":
+                types = new String[] {"Int", "String", "String", "Date", "String", "Int"};
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?)";
+                break;
+            case "Clubs":
+                types = new String[] {"Int", "String", "String", "Int"};
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?)";
+                break;
+            case "Stadiums":
+                types = new String[] {"Int", "String", "Int", "Int"};
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?)";
+                break;
+            case "Matches":
+                types = new String[] {"Int", "Date", "Int", "Int", "Int", "Int", "Int"};
+                sql = "INSERT INTO " + tableName + " VALUES(?, ?, ?, ?, ?, ?, ?)";
+                break;
         }
         statement = con.prepareStatement(sql);
         statement = statetmentBuilder(statement, valuesToInsert, types);
