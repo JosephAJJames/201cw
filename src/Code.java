@@ -5,7 +5,7 @@ import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Code {
+class Code {
 
     String[] joesSQLStatments = {"DROP DATABASE IF EXISTS PremGames" ,"CREATE DATABASE PremGames;", "USE PremGames;", 
 
@@ -57,9 +57,9 @@ public class Code {
 
     String[] scottsSQLStatments = {"DROP DATABASE IF EXISTS footballStuff" ,"CREATE DATABASE footballStuff;", "USE footballStuff;", 
 
-    "CREATE TABLE Players (player_id INT NOT NULL PRIMARY KEY, player_name VARCHAR(100), nationality VARCHAR(50), date_of_birth DATE, position VARCHAR(20), club_id INT NOT NULL, FOREIGN KEY (club_id) REFERENCES Clubs(club_id) ON DELETE RESTRICT);",
-
     "CREATE TABLE Clubs (club_id INT NOT NULL PRIMARY KEY, club_name VARCHAR(100) UNIQUE NOT NULL, country VARCHAR(50), founded_year INT);",
+
+    "CREATE TABLE Players (player_id INT NOT NULL PRIMARY KEY, player_name VARCHAR(100), nationality VARCHAR(50), date_of_birth DATE, position VARCHAR(20), club_id INT NOT NULL, FOREIGN KEY (club_id) REFERENCES Clubs(club_id) ON DELETE RESTRICT);",
 
     "CREATE TABLE Stadiums (stadium_id INT NOT NULL PRIMARY KEY, stadium_name VARCHAR(100) NOT NULL, club_id INT NOT NULL, stadium_capacity INT, FOREIGN KEY (club_id) REFERENCES Clubs(club_id) ON DELETE RESTRICT);",
 
@@ -69,9 +69,7 @@ public class Code {
     String[] scottsDELETEQuerys = {"DELETE FROM Clubs WHERE club_id = 1;",
                                 "DELETE FROM Stadiums WHERE stadium_id = 1;"};
 
-    String[] scottsSELECTQuerys = {"SELECT match_id FROM Matches WHERE (home_goals > away_goals)"};
-
-    String[] scottsGroupByQuerys = {"SELECT club_id, COUNT(*) AS num_players FROM Players GROUP BY club_id HAVING COUNT(*) > 20;",
+    String[] scottsSELECTQuerys = {"SELECT club_id, COUNT(*) AS num_players FROM Players GROUP BY club_id HAVING COUNT(*) > 20;",
                                 "SELECT stadium_id, stadium_name, stadium_capacity FROM Stadiums GROUP BY stadium_id, stadium_name, stadium_capacity HAVING stadium_capacity > 10000;"};
 
     
